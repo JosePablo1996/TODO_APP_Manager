@@ -47,12 +47,23 @@ export interface LoginResponse {
 
 const TOKEN_VERSION_ERROR_KEY = 'token_version_error_shown';
 
+// ✅ CORREGIDO: Usar el RP ID correcto según el entorno
 function getCorrectRpId(): string {
   const hostname = window.location.hostname;
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return 'localhost';
+    // En desarrollo local, usamos el RP ID del backend de producción
+    // porque el proxy de Vite redirige a Render
+    return 'todo-app-backend-fastapi-klh2.onrender.com';
   }
+  // En producción (Netlify, Render, etc.), usar el hostname del backend
   return 'todo-app-backend-fastapi-klh2.onrender.com';
+}
+
+// ✅ Verificar si estamos en entorno de desarrollo
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function isDevelopment(): boolean {
+  return window.location.hostname === 'localhost' || 
+         window.location.hostname === '127.0.0.1';
 }
 
 export const useAuth = () => {
@@ -316,6 +327,7 @@ export const useAuth = () => {
     }
   }, [isAuthenticated, logout, loadUser]);
 
+  // ✅ CORREGIDO: registerPasskey con RP ID correcto
   const registerPasskey = useCallback(async (deviceName?: string): Promise<PasskeyRegisterResult> => {
     if (!isAuthenticated) return { success: false, message: 'Debes iniciar sesión primero' };
     const tokenValid = await refreshTokenIfNeeded();
@@ -323,17 +335,33 @@ export const useAuth = () => {
     
     setPasskeyLoading(true);
     try {
-      const options = await authService.webauthnRegisterBegin({ device_name: deviceName || 'Mi Dispositivo', device_type: 'web' });
+      const options = await authService.webauthnRegisterBegin({ 
+        device_name: deviceName || 'Mi Dispositivo', 
+        device_type: 'web' 
+      });
+      
       const { startRegistration } = await import('@simplewebauthn/browser');
       const rpId = getCorrectRpId();
+      
+      console.log('🔑 registerPasskey: Usando RP ID:', rpId);
       
       const attestationResponse = await startRegistration({
         optionsJSON: {
           challenge: options.challenge,
           rp: { id: rpId, name: options.rp_name },
-          user: { id: options.user_id, name: options.username, displayName: options.display_name },
-          pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
-          authenticatorSelection: { residentKey: 'required', userVerification: 'preferred' },
+          user: { 
+            id: options.user_id, 
+            name: options.username, 
+            displayName: options.display_name 
+          },
+          pubKeyCredParams: [
+            { type: 'public-key', alg: -7 }, 
+            { type: 'public-key', alg: -257 }
+          ],
+          authenticatorSelection: { 
+            residentKey: 'required', 
+            userVerification: 'preferred' 
+          },
           attestation: 'none',
         },
       });
@@ -342,72 +370,118 @@ export const useAuth = () => {
         credential_id: attestationResponse.id,
         client_data_json: attestationResponse.response.clientDataJSON,
         attestation_object: attestationResponse.response.attestationObject,
-        device_name: deviceName || 'Mi Dispositivo', device_type: 'web', challenge: options.challenge,
+        device_name: deviceName || 'Mi Dispositivo', 
+        device_type: 'web', 
+        challenge: options.challenge,
       });
       
-      if (result.success) { window.dispatchEvent(new CustomEvent('passkeys-updated')); return { success: true, message: result.message }; }
-      else return { success: false, message: result.message };
+      if (result.success) { 
+        window.dispatchEvent(new CustomEvent('passkeys-updated')); 
+        return { success: true, message: result.message }; 
+      } else { 
+        return { success: false, message: result.message }; 
+      }
     } catch (err: unknown) {
       let errorMessage = 'Error al registrar passkey';
       if (err instanceof Error) errorMessage = err.message;
+      console.error('❌ registerPasskey: Error:', errorMessage);
       return { success: false, message: errorMessage };
-    } finally { setPasskeyLoading(false); }
+    } finally { 
+      setPasskeyLoading(false); 
+    }
   }, [isAuthenticated, refreshTokenIfNeeded]);
 
+  // ✅ CORREGIDO: loginWithPasskey sin doble guardado de tokens y con RP ID correcto
   const loginWithPasskey = useCallback(async (email?: string): Promise<PasskeyLoginResult> => {
     setPasskeyLoading(true);
     try {
+      console.log('🔑 loginWithPasskey: Iniciando...', email ? `para ${email}` : 'sin email');
+      
       const options = await authService.webauthnLoginBegin({ email });
       const { startAuthentication } = await import('@simplewebauthn/browser');
       
       let allowCredentials: PublicKeyCredentialDescriptorJSON[] | undefined = undefined;
       if (options.allow_credentials?.length) {
         allowCredentials = options.allow_credentials.map((cred: { id: string; type: string }) => ({
-          id: cred.id, type: 'public-key' as const,
+          id: cred.id, 
+          type: 'public-key' as const,
           transports: ['internal', 'hybrid', 'ble', 'nfc', 'usb'] as const,
         }));
       }
       
       const rpId = getCorrectRpId();
+      console.log('🔑 loginWithPasskey: Usando RP ID:', rpId);
+      
       const authResponse = await startAuthentication({
-        optionsJSON: { challenge: options.challenge, rpId, allowCredentials, timeout: options.timeout || 60000, userVerification: 'preferred' },
+        optionsJSON: { 
+          challenge: options.challenge, 
+          rpId, 
+          allowCredentials, 
+          timeout: options.timeout || 60000, 
+          userVerification: 'preferred' 
+        },
       });
       
+      // ✅ authService.webauthnLoginComplete YA guarda los tokens
+      // No llamamos a saveTokens aquí para evitar duplicados
       const result = await authService.webauthnLoginComplete({
         credential_id: authResponse.id,
         client_data_json: authResponse.response.clientDataJSON,
         authenticator_data: authResponse.response.authenticatorData,
         signature: authResponse.response.signature,
-        user_handle: authResponse.response.userHandle, challenge: options.challenge,
+        user_handle: authResponse.response.userHandle, 
+        challenge: options.challenge,
       });
       
       if (result.success && result.access_token) {
-        saveTokens(result.access_token, result.refresh_token || undefined);
+        // ✅ Los tokens ya fueron guardados por authService.webauthnLoginComplete
         if (isMounted.current) setIsAuthenticated(true);
         await loadUser();
         window.dispatchEvent(new CustomEvent('auth-change'));
         
         const userProfile: UserProfile = {
-          id: result.user?.id || '', email: result.user?.email || '',
+          id: result.user?.id || '', 
+          email: result.user?.email || '',
           username: result.user?.username || result.user?.email?.split('@')[0] || '',
-          full_name: result.user?.full_name, avatar: result.user?.avatar,
+          full_name: result.user?.full_name, 
+          avatar: result.user?.avatar,
         };
-        if (isMounted.current) { setUser(userProfile); setIsAuthenticated(true); }
-        return { success: true, user: userProfile, message: result.message || 'Login exitoso' };
+        
+        if (isMounted.current) { 
+          setUser(userProfile); 
+          setIsAuthenticated(true); 
+        }
+        
+        return { 
+          success: true, 
+          user: userProfile, 
+          message: result.message || 'Login exitoso con passkey' 
+        };
       } else {
-        return { success: false, message: result.message || 'Error al autenticar' };
+        return { 
+          success: false, 
+          message: result.message || 'Error al autenticar con passkey' 
+        };
       }
     } catch (err: unknown) {
       let errorMessage = 'Error al iniciar sesión con passkey';
-      if (err instanceof Error) errorMessage = err.message;
+      if (err instanceof Error) {
+        errorMessage = err.message;
+        console.error('❌ loginWithPasskey: Error:', err.message);
+      }
       return { success: false, message: errorMessage };
-    } finally { setPasskeyLoading(false); }
-  }, [loadUser, saveTokens]);
+    } finally { 
+      setPasskeyLoading(false); 
+    }
+  }, [loadUser]);
 
   const listPasskeys = useCallback(async () => {
     if (!isAuthenticated) return [];
-    try { return await authService.webauthnListCredentials(); }
-    catch { return []; }
+    try { 
+      return await authService.webauthnListCredentials(); 
+    } catch { 
+      return []; 
+    }
   }, [isAuthenticated]);
 
   const deletePasskey = useCallback(async (credentialId: string): Promise<{ success: boolean; message?: string }> => {
@@ -416,15 +490,22 @@ export const useAuth = () => {
       const result = await authService.webauthnDeleteCredential(credentialId);
       if (result.success) window.dispatchEvent(new CustomEvent('passkeys-updated'));
       return result;
-    } catch { return { success: false, message: 'Error al eliminar passkey' }; }
+    } catch { 
+      return { success: false, message: 'Error al eliminar passkey' }; 
+    }
   }, [isAuthenticated]);
 
   const checkWebAuthnHealth = useCallback(async () => {
-    try { return await authService.webauthnHealthCheck(); }
-    catch { return { status: 'error', rp_id: '', configured: false }; }
+    try { 
+      return await authService.webauthnHealthCheck(); 
+    } catch { 
+      return { status: 'error', rp_id: '', configured: false }; 
+    }
   }, []);
 
-  const refreshUser = useCallback(() => { loadUser(); }, [loadUser]);
+  const refreshUser = useCallback(() => { 
+    loadUser(); 
+  }, [loadUser]);
 
   const updateLocalProfile = useCallback((updates: Partial<UserProfile>) => {
     if (user && isMounted.current) {
@@ -448,12 +529,24 @@ export const useAuth = () => {
     isMounted.current = true;
     if (!loadingRef.current) loadUser();
 
-    const handleAuthChange = () => { console.log('📢 Evento auth-change recibido'); loadUser(); };
+    const handleAuthChange = () => { 
+      console.log('📢 Evento auth-change recibido'); 
+      loadUser(); 
+    };
+    
     const handleAuthLogout = () => {
-      if (isMounted.current) { setUser(null); setIsAuthenticated(false); setTokenVersionError(null); setLoading(false); }
+      if (isMounted.current) { 
+        setUser(null); 
+        setIsAuthenticated(false); 
+        setTokenVersionError(null); 
+        setLoading(false); 
+      }
       navigate('/login', { replace: true });
     };
-    const handleTokenVersionInvalidEvent = (event: Event) => { handleTokenVersionInvalid(event as CustomEvent); };
+    
+    const handleTokenVersionInvalidEvent = (event: Event) => { 
+      handleTokenVersionInvalid(event as CustomEvent); 
+    };
 
     window.addEventListener('auth-change', handleAuthChange);
     window.addEventListener('auth:logout', handleAuthLogout);

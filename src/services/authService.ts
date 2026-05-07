@@ -254,7 +254,7 @@ class AuthService {
       baseURL: API_URL,
       timeout: 30000,
       headers: { 'Content-Type': 'application/json' },
-      withCredentials: true,
+      withCredentials: true, // ✅ Siempre true, el interceptor decide
     });
 
     this.setupInterceptors();
@@ -282,13 +282,13 @@ class AuthService {
         console.log(`📡 [REQUEST] ${config.method?.toUpperCase()} ${config.url}`);
         
         if (isPublicEndpoint) {
-          config.withCredentials = false;
+          // ✅ No forzar withCredentials: false, dejar que el navegador maneje cookies
+          // En desarrollo con proxy, las cookies de sesión son necesarias para 2FA
           console.log(`🔓 [PUBLIC] Endpoint público: ${config.url}`);
           if (config.headers) {
             delete config.headers.Authorization;
           }
         } else {
-          config.withCredentials = true;
           const token = this.getToken();
           if (token) {
             config.headers = config.headers || {};

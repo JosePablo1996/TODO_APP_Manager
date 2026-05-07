@@ -559,7 +559,7 @@ const ProtectedPage: React.FC = () => {
       />
 
       {/* Main Content */}
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${isLeftMenuOpen ? 'ml-64' : 'ml-20'}`}>
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${isLeftMenuOpen ? 'ml-64' : 'ml-0'}`}>
         {/* Header */}
         <Header
           user={safeUser}
