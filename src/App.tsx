@@ -1,5 +1,5 @@
 // src/App.tsx
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeProvider';
 import { useAuth } from './hooks/useAuth';
@@ -16,7 +16,7 @@ import ArchivedPage from './pages/ArchivedPage';
 import StatisticsPage from './pages/StatisticsPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
-import BackupPage from './pages/BackupPage';        // ✅ NUEVO
+import BackupPage from './pages/BackupPage';
 import DeveloperPage from './pages/DeveloperPage';
 import ChangelogPage from './pages/ChangelogPage';
 import HelpPage from './pages/HelpPage';
@@ -90,19 +90,13 @@ const PublicRoute: React.FC<PublicRouteProps> = ({ children, allowAuthenticated 
   const { isAuthenticated, loading } = useAuthContext();
   const location = useLocation();
 
-  const shouldRender = useMemo(() => {
-    if (isAuthenticated && !allowAuthenticated) return false;
-    if (loading) return false;
-    return true;
-  }, [isAuthenticated, loading, allowAuthenticated]);
+  // ✅ CORREGIDO: Todos los paths retornan explícitamente
+  if (loading) {
+    return <LoadingScreen message="Cargando..." />;
+  }
 
-  if (!shouldRender) {
-    if (loading) {
-      return <LoadingScreen message="Cargando..." />;
-    }
-    if (isAuthenticated && !allowAuthenticated) {
-      return <Navigate to={location.state?.from || "/dashboard"} replace />;
-    }
+  if (isAuthenticated && !allowAuthenticated) {
+    return <Navigate to={location.state?.from || "/dashboard"} replace />;
   }
 
   return <>{children}</>;
@@ -207,7 +201,7 @@ const AppRoutes: React.FC = () => {
         }
       />
 
-      {/* ✅ NUEVO: Copia de Seguridad */}
+      {/* Copia de Seguridad */}
       <Route
         path="/backup"
         element={

@@ -149,6 +149,11 @@ const SettingsPage: React.FC = () => {
   const { user, logout } = useAuth();
   const classes = useThemeClasses();
   
+  // ✅ Detectar si es desarrollo local
+  const isLocalhost = window.location.hostname === 'localhost' || 
+                      window.location.hostname === '127.0.0.1' ||
+                      window.location.hostname.includes('192.168.');
+  
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [selectedSortOrder, setSelectedSortOrder] = useState('Fecha de modificación');
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
@@ -174,7 +179,7 @@ const SettingsPage: React.FC = () => {
 
   const confirmResetPassword = () => {
     setShowResetConfirm(false);
-    window.location.href = '/forgot-password';
+    navigate('/forgot-password');
   };
 
   const handleLogout = async () => {
@@ -225,7 +230,7 @@ const SettingsPage: React.FC = () => {
 
   return (
     <div className={`min-h-screen ${classes.bg.primary}`}>
-      {/* Header - Responsive */}
+      {/* Header */}
       <div className={`sticky top-0 z-10 backdrop-blur-xl border-b ${classes.border.primary} ${classes.bg.card}`}>
         <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
           <div className="flex items-center gap-3 sm:gap-4">
@@ -250,9 +255,9 @@ const SettingsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Contenido - Responsive */}
+      {/* Contenido */}
       <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
-        {/* PERFIL DEL USUARIO - DISEÑO MEJORADO */}
+        {/* PERFIL DEL USUARIO */}
         <SectionHeader title="Perfil" icon={<User size={14} />} />
         <GlassCard className="overflow-visible">
           <div className="p-6 sm:p-8 flex flex-col items-center justify-center gap-4 sm:gap-5">
@@ -414,48 +419,52 @@ const SettingsPage: React.FC = () => {
         {/* SEGURIDAD */}
         <SectionHeader title="Seguridad" icon={<Shield size={14} />} />
         <GlassCard>
-          {/* PASSKEYS CON DROPDOWN */}
-          <motion.div
-            whileHover={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }}
-            onClick={() => setShowPasskeyDropdown(!showPasskeyDropdown)}
-            className={`flex items-center gap-3 sm:gap-4 p-3 sm:p-4 cursor-pointer transition-colors border-b ${classes.border.primary}`}
-          >
-            <div className="p-2 sm:p-3 rounded-xl bg-indigo-500/10 flex-shrink-0">
-              <Fingerprint className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className={`font-medium text-sm sm:text-base ${classes.text.primary}`}>
-                Claves de acceso (Passkeys)
-              </h3>
-              <p className={`text-xs sm:text-sm truncate ${classes.text.secondary}`}>
-                Usa tu huella digital, Face ID o PIN para iniciar sesión
-              </p>
-            </div>
-            <motion.div 
-              animate={{ rotate: showPasskeyDropdown ? 180 : 0 }}
-              transition={{ duration: 0.3 }}
-              className={`${classes.icon.secondary} flex-shrink-0`}
-            >
-              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5" />
-            </motion.div>
-          </motion.div>
-
-          <AnimatePresence>
-            {showPasskeyDropdown && (
+          {/* ✅ PASSKEYS - SOLO EN LOCALHOST */}
+          {isLocalhost && (
+            <>
               <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden"
+                whileHover={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }}
+                onClick={() => setShowPasskeyDropdown(!showPasskeyDropdown)}
+                className={`flex items-center gap-3 sm:gap-4 p-3 sm:p-4 cursor-pointer transition-colors border-b ${classes.border.primary}`}
               >
-                <div className={`p-3 sm:p-4 border-t ${classes.border.primary} bg-gradient-to-br from-indigo-500/5 to-purple-500/5`}>
-                  <PasskeyManager />
+                <div className="p-2 sm:p-3 rounded-xl bg-indigo-500/10 flex-shrink-0">
+                  <Fingerprint className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500" />
                 </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className={`font-medium text-sm sm:text-base ${classes.text.primary}`}>
+                    Claves de acceso (Passkeys)
+                  </h3>
+                  <p className={`text-xs sm:text-sm truncate ${classes.text.secondary}`}>
+                    Usa tu huella digital, Face ID o PIN para iniciar sesión
+                  </p>
+                </div>
+                <motion.div 
+                  animate={{ rotate: showPasskeyDropdown ? 180 : 0 }}
+                  transition={{ duration: 0.3 }}
+                  className={`${classes.icon.secondary} flex-shrink-0`}
+                >
+                  <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5" />
+                </motion.div>
               </motion.div>
-            )}
-          </AnimatePresence>
 
-          {/* 2FA CON DROPDOWN */}
+              <AnimatePresence>
+                {showPasskeyDropdown && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className={`p-3 sm:p-4 border-t ${classes.border.primary} bg-gradient-to-br from-indigo-500/5 to-purple-500/5`}>
+                      <PasskeyManager />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </>
+          )}
+
+          {/* ✅ 2FA - SIEMPRE VISIBLE */}
           <motion.div
             whileHover={{ backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }}
             onClick={() => setShow2FADropdown(!show2FADropdown)}
@@ -496,7 +505,7 @@ const SettingsPage: React.FC = () => {
             )}
           </AnimatePresence>
 
-          {/* ✅ NUEVO: COPIA DE SEGURIDAD */}
+          {/* COPIA DE SEGURIDAD */}
           <SettingsTile
             icon={<HardDrive className="w-4 h-4 sm:w-5 sm:h-5 text-teal-500" />}
             iconColor="bg-teal-500/10"
@@ -638,7 +647,7 @@ const SettingsPage: React.FC = () => {
             <div className="flex-1 min-w-0">
               <h3 className={`font-medium text-sm sm:text-base ${classes.text.primary}`}>Versión</h3>
               <p className={`text-xs sm:text-sm truncate ${classes.text.secondary}`}>
-                TodoAppManager v2.5.0 - Supabase Edition
+                TodoAppManager v2.6.0 - Supabase Edition
               </p>
             </div>
             <Sparkles className="w-4 h-4 text-emerald-500" />

@@ -1,5 +1,6 @@
 // src/pages/ProtectedPage.tsx
 import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useTasks } from '../hooks/useTasks';
 import { useDebounce } from '../hooks/useDebounce';
@@ -199,6 +200,7 @@ const BulkDeleteModal: React.FC<{
 };
 
 const ProtectedPage: React.FC = () => {
+  const navigate = useNavigate();
   const { user, isAuthenticated, loading: authLoading, logout } = useAuth();
   const { 
     tasks, 
@@ -667,7 +669,7 @@ const ProtectedPage: React.FC = () => {
                   {!isSelectionMode && (
                     <div className="mb-2">
                       <button
-                        onClick={() => window.location.href = '/crear-tarea'}
+                        onClick={() => navigate('/crear-tarea')}
                         className="w-full py-2 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center gap-1.5 group text-xs"
                       >
                         <Plus size={14} />
@@ -843,7 +845,7 @@ const ProtectedPage: React.FC = () => {
                           Crea tu primera tarea para comenzar a organizar tu día.
                         </p>
                         <button
-                          onClick={() => window.location.href = '/crear-tarea'}
+                          onClick={() => navigate('/crear-tarea')}
                           className="px-4 py-1.5 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white rounded-lg font-medium hover:shadow-md transition-all flex items-center gap-1.5 group text-xs mx-auto"
                         >
                           <Plus size={14} className="group-hover:rotate-90 transition-transform" />
@@ -883,7 +885,7 @@ const ProtectedPage: React.FC = () => {
                           Crea tu primera tarea para comenzar a ver estadísticas.
                         </p>
                         <button 
-                          onClick={() => window.location.href = '/crear-tarea'} 
+                          onClick={() => navigate('/crear-tarea')} 
                           className={`mt-1 px-3 py-1 rounded-lg font-medium transition-all text-[11px] ${classes.button.primary}`}
                         >
                           Crear mi primera tarea
