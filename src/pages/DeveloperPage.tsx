@@ -43,6 +43,7 @@ import {
   Wifi,
   Layers
 } from 'lucide-react';
+import developerAvatarImg from '../assets/developer-avatar.png';
 
 // ============================================
 // COMPONENTES AUXILIARES
@@ -142,9 +143,7 @@ const DeveloperPage: React.FC = () => {
   const classes = useThemeClasses();
   const [imgError, setImgError] = useState(false);
 
-  // Ruta de la imagen personalizada
-  const developerAvatar = developerAvatarImg;
-  const avatarSrc = imgError || !developerAvatar ? null : developerAvatar;
+  const avatarSrc = imgError ? null : developerAvatarImg;
 
   // ✅ Tecnologías ACTUALIZADAS - Análisis completo del backend (requirements.txt, config.py, models.py)
   const technologies = [
@@ -198,7 +197,7 @@ const DeveloperPage: React.FC = () => {
     { name: 'Cryptography 44', icon: Lock, color: 'red' },
     
     // ============================================
-    // AUTENTICACIÓN 2FA Y OTP (v2.5.0)
+    // AUTENTICACIÓN 2FA Y OTP (v2.6.0)
     // ============================================
     { name: 'TOTP (2FA)', icon: Smartphone, color: 'amber' },
     { name: 'PyOTP 2.9', icon: Hash, color: 'orange' },
@@ -282,7 +281,7 @@ const DeveloperPage: React.FC = () => {
               >
                 <Rocket className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                 <span className="text-white font-bold text-xs sm:text-sm md:text-base">
-                  Versión 2.5.0
+                  Versión 2.6.0
                 </span>
               </motion.div>
             </div>
@@ -504,7 +503,7 @@ const DeveloperPage: React.FC = () => {
           {/* Contador de tecnologías */}
           <div className={`mt-5 pt-4 border-t ${classes.border.primary}`}>
             <p className={`text-xs text-center ${classes.text.muted}`}>
-              <span className="font-bold text-emerald-500">{technologies.length}</span> tecnologías utilizadas para el desarrollo de TodoAppManager v2.5.0
+              <span className="font-bold text-emerald-500">{technologies.length}</span> tecnologías utilizadas para el desarrollo de TodoAppManager v2.6.0
             </p>
           </div>
         </motion.div>
@@ -576,7 +575,7 @@ const DeveloperPage: React.FC = () => {
               className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border border-emerald-500/20"
             >
               <Rocket className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-500/70" />
-              <span className="text-sm sm:text-base font-medium text-emerald-600 dark:text-emerald-400">Versión 2.5.0</span>
+              <span className="text-sm sm:text-base font-medium text-emerald-600 dark:text-emerald-400">Versión 2.6.0</span>
             </motion.span>
             
             {/* Información del desarrollador - Estilo limpio */}
