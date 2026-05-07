@@ -65,7 +65,7 @@ const LoginPage: React.FC = () => {
   const [selectedAlternativeMethod, setSelectedAlternativeMethod] = useState<'none' | 'passkey'>('none');
   const [passwordValue, setPasswordValue] = useState('');
   
-  // ✅ Detectar si es desarrollo local
+  // ✅ Detectar si es desarrollo local (solo Passkey necesita localhost)
   const isLocalhost = window.location.hostname === 'localhost' || 
                       window.location.hostname === '127.0.0.1' ||
                       window.location.hostname.includes('192.168.');
@@ -277,9 +277,8 @@ const LoginPage: React.FC = () => {
 
   const benefits = [
     { icon: <CheckCircle size={20} />, title: 'Acceso instantáneo', desc: 'Tus tareas siempre disponibles', color: 'from-emerald-500 to-teal-500' },
-    { icon: <Fingerprint size={20} />, title: 'Acceso con Passkey', desc: 'Inicia sesión con huella digital o Face ID', color: 'from-blue-500 to-indigo-500' },
-    { icon: <KeyRound size={20} />, title: 'Código por email', desc: 'Recibe un código de 6 dígitos', color: 'from-purple-500 to-pink-500' },
     { icon: <Shield size={20} />, title: 'Autenticación 2FA', desc: 'Protección con Google Authenticator', color: 'from-orange-500 to-red-500' },
+    { icon: <KeyRound size={20} />, title: 'Código por email', desc: 'Recibe un código de 6 dígitos', color: 'from-purple-500 to-pink-500' },
     { icon: <Zap size={20} />, title: 'Sincronización', desc: 'Accede desde cualquier dispositivo', color: 'from-yellow-500 to-amber-500' },
     { icon: <Star size={20} />, title: 'Tareas favoritas', desc: 'Marca tus tareas más importantes', color: 'from-pink-500 to-rose-500' },
     { icon: <Calendar size={20} />, title: 'Calendario', desc: 'Visualiza tus tareas por fecha', color: 'from-cyan-500 to-blue-500' },
@@ -548,26 +547,24 @@ const LoginPage: React.FC = () => {
                       )}
                     </motion.button>
 
-                    {/* ✅ Botón "Más opciones" - SOLO EN LOCALHOST */}
-                    {isLocalhost && (
-                      <div className="relative">
-                        <motion.button
-                          type="button"
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={toggleAlternativeMethods}
-                          className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-medium transition-all duration-300 ${
-                            showAlternativeMethods
-                              ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/25'
-                              : 'bg-gradient-to-r from-purple-500/10 to-pink-500/10 hover:from-purple-500/20 hover:to-pink-500/20 text-purple-700 dark:text-purple-300 border-2 border-purple-300 dark:border-purple-700 hover:border-purple-400 dark:hover:border-purple-500'
-                          }`}
-                        >
-                          <MoreHorizontal size={18} className={showAlternativeMethods ? 'text-white' : 'text-purple-500'} />
-                          <span className={showAlternativeMethods ? 'text-white' : ''}>Más opciones de inicio de sesión</span>
-                          {showAlternativeMethods ? <ChevronUp size={18} className="text-white" /> : <ChevronDown size={18} className="text-purple-500" />}
-                        </motion.button>
-                      </div>
-                    )}
+                    {/* ✅ Botón "Más opciones" - SIEMPRE VISIBLE (OTP + Passkey solo en localhost) */}
+                    <div className="relative">
+                      <motion.button
+                        type="button"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={toggleAlternativeMethods}
+                        className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-medium transition-all duration-300 ${
+                          showAlternativeMethods
+                            ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/25'
+                            : 'bg-gradient-to-r from-purple-500/10 to-pink-500/10 hover:from-purple-500/20 hover:to-pink-500/20 text-purple-700 dark:text-purple-300 border-2 border-purple-300 dark:border-purple-700 hover:border-purple-400 dark:hover:border-purple-500'
+                        }`}
+                      >
+                        <MoreHorizontal size={18} className={showAlternativeMethods ? 'text-white' : 'text-purple-500'} />
+                        <span className={showAlternativeMethods ? 'text-white' : ''}>Más opciones de inicio de sesión</span>
+                        {showAlternativeMethods ? <ChevronUp size={18} className="text-white" /> : <ChevronDown size={18} className="text-purple-500" />}
+                      </motion.button>
+                    </div>
 
                     <div className="relative my-4">
                       <div className="absolute inset-0 flex items-center">
@@ -588,22 +585,22 @@ const LoginPage: React.FC = () => {
                   {/* ✅ FIN DEL FORMULARIO DE LOGIN */}
 
                   {/* ============================================ */}
-                  {/* ✅ DROPDOWN DE MÉTODOS ALTERNATIVOS - SOLO EN LOCALHOST */}
+                  {/* ✅ DROPDOWN DE MÉTODOS ALTERNATIVOS - SIEMPRE VISIBLE */}
                   {/* ============================================ */}
-                  {isLocalhost && (
-                    <AnimatePresence>
-                      {showAlternativeMethods && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0, y: -10 }}
-                          animate={{ opacity: 1, height: 'auto', y: 0 }}
-                          exit={{ opacity: 0, height: 0, y: -10 }}
-                          transition={{ duration: 0.2 }}
-                          className="mt-3 overflow-hidden"
-                        >
-                          <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border-2 border-purple-200 dark:border-purple-700 space-y-3">
-                            <p className="text-xs text-center text-purple-600 dark:text-purple-400 font-medium mb-1">Selecciona un método alternativo</p>
-                            
-                            {/* ✅ Botón Passkey */}
+                  <AnimatePresence>
+                    {showAlternativeMethods && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0, y: -10 }}
+                        animate={{ opacity: 1, height: 'auto', y: 0 }}
+                        exit={{ opacity: 0, height: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        className="mt-3 overflow-hidden"
+                      >
+                        <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border-2 border-purple-200 dark:border-purple-700 space-y-3">
+                          <p className="text-xs text-center text-purple-600 dark:text-purple-400 font-medium mb-1">Selecciona un método alternativo</p>
+                          
+                          {/* ✅ Passkey - SOLO EN LOCALHOST */}
+                          {isLocalhost && (
                             <motion.button
                               type="button"
                               whileHover={{ scale: 1.02 }}
@@ -624,26 +621,28 @@ const LoginPage: React.FC = () => {
                               </div>
                               {selectedAlternativeMethod === 'passkey' && <CheckCircle size={18} className="text-white" />}
                             </motion.button>
+                          )}
 
-                            {/* ✅ Botón OTP */}
-                            <motion.button
-                              type="button"
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              onClick={() => navigate('/email-otp')}
-                              className="w-full flex items-center gap-3 p-3 rounded-xl transition-all bg-white dark:bg-gray-800 border-2 border-emerald-200 dark:border-emerald-700 hover:border-emerald-400 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
-                            >
-                              <div className="p-2.5 rounded-xl bg-emerald-500/10">
-                                <Smartphone size={20} className="text-emerald-500" />
-                              </div>
-                              <div className="flex-1 text-left">
-                                <span className="font-semibold text-sm text-gray-800 dark:text-gray-200">Código OTP</span>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">Recibe un código por email</p>
-                              </div>
-                              <ArrowRight size={16} className="text-emerald-500" />
-                            </motion.button>
+                          {/* ✅ OTP - SIEMPRE VISIBLE */}
+                          <motion.button
+                            type="button"
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => navigate('/email-otp')}
+                            className="w-full flex items-center gap-3 p-3 rounded-xl transition-all bg-white dark:bg-gray-800 border-2 border-emerald-200 dark:border-emerald-700 hover:border-emerald-400 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                          >
+                            <div className="p-2.5 rounded-xl bg-emerald-500/10">
+                              <Smartphone size={20} className="text-emerald-500" />
+                            </div>
+                            <div className="flex-1 text-left">
+                              <span className="font-semibold text-sm text-gray-800 dark:text-gray-200">Código OTP</span>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">Recibe un código por email</p>
+                            </div>
+                            <ArrowRight size={16} className="text-emerald-500" />
+                          </motion.button>
 
-                            {/* ✅ Passkey (si se selecciona) */}
+                          {/* ✅ Passkey (si se selecciona) - SOLO EN LOCALHOST */}
+                          {isLocalhost && (
                             <AnimatePresence>
                               {selectedAlternativeMethod === 'passkey' && (
                                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="pt-3">
@@ -653,11 +652,11 @@ const LoginPage: React.FC = () => {
                                 </motion.div>
                               )}
                             </AnimatePresence>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  )}
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                   
                 </div>
               </motion.div>
