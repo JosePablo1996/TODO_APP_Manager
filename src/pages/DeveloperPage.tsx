@@ -143,7 +143,7 @@ const DeveloperPage: React.FC = () => {
   const [imgError, setImgError] = useState(false);
 
   // Ruta de la imagen personalizada
-  const developerAvatar = '/src/assets/developer-avatar.png';
+  const developerAvatar = developerAvatarImg;
   const avatarSrc = imgError || !developerAvatar ? null : developerAvatar;
 
   // ✅ Tecnologías ACTUALIZADAS - Análisis completo del backend (requirements.txt, config.py, models.py)
