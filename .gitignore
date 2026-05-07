@@ -1,0 +1,74 @@
+# ============================================
+# LOGS
+# ============================================
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ============================================
+# DEPENDENCIAS
+# ============================================
+node_modules
+
+# ============================================
+# BUILD OUTPUT
+# ============================================
+dist
+dist-ssr
+build
+
+# ============================================
+# VARIABLES DE ENTORNO LOCALES
+# ============================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+
+# ✅ PERMITIR estos archivos de entorno (se suben a GitHub para Render)
+!.env.production
+!.env.development
+
+# ============================================
+# ARCHIVOS DEL PROYECTO (NO SUBIR)
+# ============================================
+
+# Documentación personal
+Variables_Frontend_React.env.txt
+README.md
+
+# Archivos de configuración de herramientas
+.hintrc
+get-ip.cjs
+
+# ============================================
+# EDITOR
+# ============================================
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ============================================
+# SISTEMA OPERATIVO
+# ============================================
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ============================================
+# ARCHIVOS TEMPORALES
+# ============================================
+*.tmp
+*.temp
+*.cache
