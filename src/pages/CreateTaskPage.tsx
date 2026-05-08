@@ -16,7 +16,8 @@ import {
   Flag,
   Palette,
   Sparkles,
-  ChevronDown} from 'lucide-react';
+  ChevronDown,
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Tipos
@@ -108,7 +109,6 @@ const CreateTaskPage: React.FC = () => {
 
   if (!safeUser) return null;
 
-  // Determinar color del borde según prioridad
   const getPriorityBorderColor = () => {
     switch (priority) {
       case 'alta': return 'border-red-400 dark:border-red-600';
@@ -122,7 +122,7 @@ const CreateTaskPage: React.FC = () => {
 
   return (
     <div className={`min-h-screen ${classes.bg.primary} flex`}>
-      {/* LeftMenu */}
+      {/* LeftMenu - se superpone, no empuja el contenido */}
       <LeftMenu 
         isOpen={isLeftMenuOpen}
         onClose={toggleLeftMenu}
@@ -130,8 +130,8 @@ const CreateTaskPage: React.FC = () => {
         onLogout={handleLogout}
       />
 
-      {/* ✅ Contenido principal - ml-0 en móvil, ml-20 en desktop */}
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${isLeftMenuOpen ? 'ml-64' : 'ml-0 md:ml-20'}`}>
+      {/* ✅ Contenido principal - SIEMPRE ocupa todo el ancho */}
+      <div className="flex-1 flex flex-col transition-all duration-300">
         {/* Header */}
         <Header
           user={safeUser}
@@ -186,7 +186,6 @@ const CreateTaskPage: React.FC = () => {
               transition={{ delay: 0.1 }}
               className={`rounded-xl sm:rounded-2xl md:rounded-3xl border-2 shadow-lg sm:shadow-xl overflow-hidden ${classes.bg.card} ${classes.border.primary}`}
             >
-              {/* Banner superior con gradiente */}
               <div className="h-1 sm:h-1.5 md:h-2 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />
 
               <div className="p-3 sm:p-4 md:p-6 lg:p-8">
@@ -241,7 +240,7 @@ const CreateTaskPage: React.FC = () => {
                       />
                     </div>
 
-                    {/* Grid de 2 columnas para Prioridad y Categoría */}
+                    {/* Grid de 2 columnas */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-5">
                       {/* Prioridad */}
                       <div>
@@ -256,7 +255,6 @@ const CreateTaskPage: React.FC = () => {
                             onChange={(e) => setPriority(e.target.value as Task['priority'])}
                             className={`w-full px-3 sm:px-4 md:px-5 py-2.5 sm:py-3 md:py-3.5 rounded-lg sm:rounded-xl border-2 appearance-none cursor-pointer ${classes.bg.input} ${classes.text.primary} ${classes.border.primary} focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-sm md:text-base`}
                             aria-label="Seleccionar prioridad"
-                            title="Prioridad"
                           >
                             <option value="alta">🔴 Alta - Máxima prioridad</option>
                             <option value="media">🟡 Media - Prioridad normal</option>
@@ -280,7 +278,6 @@ const CreateTaskPage: React.FC = () => {
                             onChange={(e) => setCategory(e.target.value as Task['category'])}
                             className={`w-full px-3 sm:px-4 md:px-5 py-2.5 sm:py-3 md:py-3.5 rounded-lg sm:rounded-xl border-2 appearance-none cursor-pointer ${classes.bg.input} ${classes.text.primary} ${classes.border.primary} focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-sm md:text-base`}
                             aria-label="Seleccionar categoría"
-                            title="Categoría"
                           >
                             <option value="personal">👤 Personal</option>
                             <option value="trabajo">💼 Trabajo</option>
@@ -307,7 +304,6 @@ const CreateTaskPage: React.FC = () => {
                         onChange={(e) => setDueDate(e.target.value)}
                         className={`w-full px-3 sm:px-4 md:px-5 py-2.5 sm:py-3 md:py-3.5 rounded-lg sm:rounded-xl border-2 ${classes.bg.input} ${classes.text.primary} ${classes.border.primary} focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all cursor-pointer text-sm md:text-base`}
                         aria-label="Fecha límite"
-                        title="Fecha límite"
                       />
                     </div>
                   </div>
