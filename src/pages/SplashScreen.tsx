@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../hooks/useTheme';
 import { useAuth } from '../hooks/useAuth';
-import { Sparkles, CheckCircle, Target, Calendar, Zap, Edit3, Star } from 'lucide-react';
+import { Sparkles, CheckCircle, Target, Calendar, Zap, Edit3, Star, Cloud, Shield, Save } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const SplashScreen: React.FC = () => {
@@ -18,12 +18,15 @@ const SplashScreen: React.FC = () => {
 
   const isDarkMode = theme === 'dark';
 
-  // Frases motivacionales que rotan
+  // Frases motivacionales que rotan (actualizadas para v2.6.0)
   const phrases = [
     'Organiza tu día, alcanza tus metas ✨',
+    'Sincronización en tiempo real 🔄',
+    'Tus tareas siempre respaldadas 💾',
     'Cada tarea completada es un logro 🎯',
     'Tu productividad comienza aquí 🚀',
     'Convierte tus ideas en acciones 💡',
+    'Seguridad y respaldo garantizados 🛡️',
     'El éxito está en los detalles 📋'
   ];
 
@@ -80,7 +83,10 @@ const SplashScreen: React.FC = () => {
     { Icon: Target, delay: 2, x: '90%', y: '10%', size: 22 },
     { Icon: Calendar, delay: 4, x: '85%', y: '88%', size: 18 },
     { Icon: Zap, delay: 1, x: '12%', y: '85%', size: 20 },
-    { Icon: Sparkles, delay: 3, x: '50%', y: '92%', size: 16 },
+    { Icon: Cloud, delay: 5, x: '50%', y: '8%', size: 18 },
+    { Icon: Shield, delay: 3, x: '48%', y: '92%', size: 17 },
+    { Icon: Save, delay: 6, x: '92%', y: '45%', size: 16 },
+    { Icon: Sparkles, delay: 2.5, x: '5%', y: '50%', size: 15 },
   ];
 
   const backgroundClass = isDarkMode
@@ -130,7 +136,7 @@ const SplashScreen: React.FC = () => {
           </motion.div>
         ))}
 
-        {[...Array(15)].map((_, i) => (
+        {[...Array(20)].map((_, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, scale: 0 }}
@@ -146,8 +152,8 @@ const SplashScreen: React.FC = () => {
             }}
             className="absolute w-0.5 h-0.5 bg-white rounded-full"
             style={{
-              left: `${(i * 10) % 100}%`,
-              top: `${(i * 13) % 100}%`,
+              left: `${(i * 7) % 100}%`,
+              top: `${(i * 11) % 100}%`,
             }}
           />
         ))}
@@ -156,7 +162,7 @@ const SplashScreen: React.FC = () => {
       {/* Contenido principal - COMPACTO */}
       <div className="relative z-10 w-full max-w-3xl mx-auto px-4 h-screen flex flex-col items-center justify-center">
         
-        {/* SECCIÓN SUPERIOR: Logo y nombre - TAMAÑOS REDUCIDOS */}
+        {/* SECCIÓN SUPERIOR: Logo y nombre */}
         <motion.div 
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -193,7 +199,7 @@ const SplashScreen: React.FC = () => {
           </div>
           
           <p className="text-xs sm:text-sm text-emerald-100/90 font-light tracking-wide mt-2">
-            Organiza • Prioriza • Logra
+            Organiza • Sincroniza • Respaldada
           </p>
         </motion.div>
 
@@ -224,7 +230,7 @@ const SplashScreen: React.FC = () => {
         {/* Espacio reducido */}
         <div className="h-5 sm:h-6" />
 
-        {/* SECCIÓN: Características */}
+        {/* SECCIÓN: Características - ACTUALIZADAS PARA v2.6.0 */}
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -233,8 +239,10 @@ const SplashScreen: React.FC = () => {
         >
           {[
             { icon: CheckCircle, text: 'Tareas' },
+            { icon: Cloud, text: 'Sync' },
+            { icon: Save, text: 'Backup' },
             { icon: Calendar, text: 'Calendario' },
-            { icon: Target, text: 'Objetivos' },
+            { icon: Shield, text: 'Seguridad' },
             { icon: Zap, text: 'Productividad' }
           ].map(({ icon: Icon, text }, index) => (
             <motion.div
@@ -254,7 +262,7 @@ const SplashScreen: React.FC = () => {
         {/* Espacio flexible */}
         <div className="flex-1 min-h-[20px] max-h-[40px]" />
 
-        {/* SECCIÓN INFERIOR: Barra de carga y footer - COMPACTO */}
+        {/* SECCIÓN INFERIOR: Barra de carga y footer */}
         <motion.div 
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
@@ -301,7 +309,7 @@ const SplashScreen: React.FC = () => {
             </div>
           </div>
 
-          {/* Badge de versión */}
+          {/* Badge de versión - ACTUALIZADO */}
           <motion.div
             whileHover={{ scale: 1.03 }}
             className="px-3 py-1 rounded-full bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 backdrop-blur-md border border-white/25"
@@ -309,7 +317,7 @@ const SplashScreen: React.FC = () => {
             <div className="flex items-center gap-1.5">
               <Sparkles size={10} className="text-white/80" />
               <span className="text-white/90 text-[0.5rem] sm:text-[0.6rem] font-semibold tracking-wider">
-                VERSIÓN 2.5.0
+                VERSIÓN 2.6.0
               </span>
               <div className="w-1 h-1 rounded-full bg-emerald-300 animate-pulse" />
             </div>
@@ -326,7 +334,7 @@ const SplashScreen: React.FC = () => {
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                 </svg>
                 <span className="text-[0.5rem] sm:text-[0.6rem] font-light">
-                  Desarrollado con <span className="text-emerald-200">❤️</span> por José Pablo Miranda
+                  Desarrollado con <span className="text-emerald-200">❤️</span> por José Pablo Miranda Quintanilla
                 </span>
               </div>
             </motion.div>
