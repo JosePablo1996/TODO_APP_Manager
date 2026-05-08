@@ -1,5 +1,7 @@
 // src/types/task.ts
 
+import type { TaskIconName, TaskSizeValue, TaskOpacityValue, TaskBorderRadiusValue } from '../data/taskCustomization';
+
 /**
  * Interfaz principal de Tarea
  * Representa una tarea en la aplicación TodoApp
@@ -38,11 +40,27 @@ export interface Task {
   /** Indica si la tarea está archivada */
   isArchived?: boolean;
   
-  /** ✅ NUEVO: Fecha de eliminación (soft delete) - undefined si no está eliminada */
+  /** Fecha de eliminación (soft delete) - undefined si no está eliminada */
   deletedAt?: string;
   
   /** Color personalizado de la tarea (opcional) en formato hexadecimal */
   color?: string;
+
+  // ============================================
+  // 🎨 NUEVOS CAMPOS DE PERSONALIZACIÓN (v2.6.0)
+  // ============================================
+
+  /** Icono personalizado de la tarea */
+  icon?: TaskIconName;
+
+  /** Tamaño de la tarjeta de tarea */
+  size?: TaskSizeValue;
+
+  /** Opacidad del color de fondo */
+  opacity?: TaskOpacityValue;
+
+  /** Estilo de borde redondeado */
+  borderRadius?: TaskBorderRadiusValue;
 }
 
 /**
@@ -75,6 +93,24 @@ export type TaskSortOrder = 'asc' | 'desc';
  */
 export type TaskViewMode = 'list' | 'grid';
 
+// ============================================
+// 🎨 NUEVOS TIPOS DE PERSONALIZACIÓN
+// ============================================
+
+/**
+ * Configuración completa de personalización de una tarea
+ */
+export interface TaskCustomization {
+  /** Icono personalizado */
+  icon: TaskIconName;
+  /** Tamaño de la tarjeta */
+  size: TaskSizeValue;
+  /** Opacidad del color de fondo */
+  opacity: TaskOpacityValue;
+  /** Estilo de borde redondeado */
+  borderRadius: TaskBorderRadiusValue;
+}
+
 /**
  * Datos necesarios para crear una nueva tarea
  */
@@ -87,6 +123,11 @@ export interface CreateTaskData {
   isFavorite?: boolean;
   isArchived?: boolean;
   color?: string;
+  /** 🎨 Personalización de la tarea */
+  icon?: TaskIconName;
+  size?: TaskSizeValue;
+  opacity?: TaskOpacityValue;
+  borderRadius?: TaskBorderRadiusValue;
 }
 
 /**
@@ -102,6 +143,11 @@ export interface UpdateTaskData {
   isFavorite?: boolean;
   isArchived?: boolean;
   color?: string;
+  /** 🎨 Personalización de la tarea */
+  icon?: TaskIconName;
+  size?: TaskSizeValue;
+  opacity?: TaskOpacityValue;
+  borderRadius?: TaskBorderRadiusValue;
 }
 
 /**
@@ -141,7 +187,7 @@ export interface TaskStats {
   /** Tareas archivadas */
   archived: number;
   
-  /** ✅ NUEVO: Tareas en papelera */
+  /** Tareas en papelera */
   deleted?: number;
 }
 
@@ -159,7 +205,7 @@ export interface TaskFilters {
   endDate?: string;
   onlyFavorites?: boolean;
   onlyArchived?: boolean;
-  onlyDeleted?: boolean; // ✅ NUEVO: Filtrar solo tareas eliminadas
+  onlyDeleted?: boolean;
 }
 
 /**
@@ -289,14 +335,14 @@ export const isTaskDueSoon = (task: Task): boolean => {
 };
 
 /**
- * ✅ NUEVO: Función helper para verificar si una tarea está eliminada
+ * Función helper para verificar si una tarea está eliminada
  */
 export const isTaskDeleted = (task: Task): boolean => {
   return task.deletedAt !== undefined;
 };
 
 /**
- * ✅ NUEVO: Función helper para obtener el tiempo desde que fue eliminada
+ * Función helper para obtener el tiempo desde que fue eliminada
  */
 export const getDeletedTimeAgo = (task: Task): string => {
   if (!task.deletedAt) return '';
@@ -312,4 +358,35 @@ export const getDeletedTimeAgo = (task: Task): string => {
   if (diffHours < 24) return `hace ${diffHours} hora${diffHours !== 1 ? 's' : ''}`;
   if (diffDays < 30) return `hace ${diffDays} día${diffDays !== 1 ? 's' : ''}`;
   return `eliminada el ${deletedDate.toLocaleDateString()}`;
+};
+
+// ============================================
+// 🎨 NUEVAS FUNCIONES HELPER DE PERSONALIZACIÓN
+// ============================================
+
+/**
+ * Obtiene la configuración de personalización por defecto para nuevas tareas
+ */
+export const getDefaultTaskCustomization = (): TaskCustomization => {
+  return {
+    icon: 'CheckCircle',
+    size: 'md',
+    opacity: 'medium',
+    borderRadius: 'medium',
+  };
+};
+
+/**
+ * Combina la personalización por defecto con la proporcionada
+ */
+export const mergeTaskCustomization = (
+  customization?: Partial<TaskCustomization>
+): TaskCustomization => {
+  const defaults = getDefaultTaskCustomization();
+  return {
+    icon: customization?.icon || defaults.icon,
+    size: customization?.size || defaults.size,
+    opacity: customization?.opacity || defaults.opacity,
+    borderRadius: customization?.borderRadius || defaults.borderRadius,
+  };
 };

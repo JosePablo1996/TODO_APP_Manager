@@ -15,7 +15,18 @@ import {
   Undo2
 } from 'lucide-react';
 import { useThemeClasses } from '../../hooks/useThemeClasses';
+import { IconMapper } from '../changelog/IconMapper';
 import { CircularMenu } from '../ui/CircularMenu';
+import { 
+  getIconConfig, 
+  getSizeConfig, 
+  getOpacityConfig, 
+  getBorderRadiusConfig,
+  type TaskIconName,
+  type TaskSizeValue,
+  type TaskOpacityValue,
+  type TaskBorderRadiusValue,
+} from '../../data/taskCustomization';
 import type { Task } from '../../types/task';
 
 interface TaskItemProps {
@@ -36,6 +47,21 @@ interface PriorityStyle {
   dot: string;
 }
 
+// ============================================
+// FUNCIONES AUXILIARES
+// ============================================
+
+/**
+ * Convierte color hexadecimal a rgba con opacidad
+ */
+const hexToRgba = (hex: string, opacity: number): string => {
+  const cleanHex = hex.replace('#', '');
+  const r = parseInt(cleanHex.substring(0, 2), 16);
+  const g = parseInt(cleanHex.substring(2, 4), 16);
+  const b = parseInt(cleanHex.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
+
 export const TaskItem: React.FC<TaskItemProps> = ({
   task,
   onToggleComplete,
@@ -50,15 +76,38 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   const classes = useThemeClasses();
   const [showMenu, setShowMenu] = useState(false);
 
-  // ✅ Estados para swipe
+  // 🎨 Obtener configuraciones de personalización
+  const taskColor = task.color || '#10b981';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const taskIcon = ((task as any).icon || 'CheckCircle') as TaskIconName;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const taskSize = ((task as any).size || 'md') as TaskSizeValue;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const taskOpacity = ((task as any).opacity || 'medium') as TaskOpacityValue;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const taskBorderRadius = ((task as any).borderRadius || 'medium') as TaskBorderRadiusValue;
+
+  const iconConfig = getIconConfig(taskIcon);
+  const sizeConfig = getSizeConfig(taskSize);
+  const opacityConfig = getOpacityConfig(taskOpacity);
+  const borderRadiusConfig = getBorderRadiusConfig(taskBorderRadius);
+
+  const bgOpacity = parseFloat(opacityConfig.bgOpacity);
+  const borderOpacity = parseFloat(opacityConfig.borderOpacity);
+
+  // Colores calculados
+  const backgroundColor = hexToRgba(taskColor, bgOpacity);
+  const borderColorRgba = hexToRgba(taskColor, borderOpacity);
+
+  // Estados para swipe
   const x = useMotionValue(0);
   const swipeThreshold = 80;
 
-  // ✅ Opacidad para fondos de swipe
+  // Opacidad para fondos de swipe
   const opacityLeft = useTransform(x, [-100, -20], [1, 0]);
   const opacityRight = useTransform(x, [20, 100], [0, 1]);
 
-  // ✅ Manejar fin del swipe
+  // Manejar fin del swipe
   const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const offset = info.offset.x;
     
@@ -179,6 +228,10 @@ export const TaskItem: React.FC<TaskItemProps> = ({
     return '#10b981';
   };
 
+  // 🎨 Determinar si la tarea tiene personalización para mostrar el icono
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const hasCustomization = (task as any).icon || (task as any).size || (task as any).opacity || (task as any).borderRadius;
+
   return (
     <>
       <motion.div
@@ -192,8 +245,11 @@ export const TaskItem: React.FC<TaskItemProps> = ({
       >
         {/* Fondo izquierda - Eliminar (rojo) */}
         <motion.div
-          className="absolute inset-y-0 left-0 flex items-center justify-start px-6"
-          style={{ background: 'linear-gradient(90deg, rgba(239,68,68,0.9), rgba(239,68,68,0.3))', opacity: opacityLeft }}
+          className="absolute inset-y-0 left-0 flex items-center justify-start px-6 rounded-lg"
+          style={{ 
+            background: 'linear-gradient(90deg, rgba(239,68,68,0.9), rgba(239,68,68,0.3))', 
+            opacity: opacityLeft.get()
+          }}
         >
           <div className="flex items-center gap-2 text-white">
             <Trash2 size={22} />
@@ -203,8 +259,11 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 
         {/* Fondo derecha - Completar/Reabrir (verde) */}
         <motion.div
-          className="absolute inset-y-0 right-0 flex items-center justify-end px-6"
-          style={{ background: 'linear-gradient(270deg, rgba(16,185,129,0.9), rgba(16,185,129,0.3))', opacity: opacityRight }}
+          className="absolute inset-y-0 right-0 flex items-center justify-end px-6 rounded-lg"
+          style={{ 
+            background: 'linear-gradient(270deg, rgba(16,185,129,0.9), rgba(16,185,129,0.3))', 
+            opacity: opacityRight.get()
+          }}
         >
           <div className="flex items-center gap-2 text-white">
             <span className="text-sm font-semibold">{task.completed ? 'Reabrir' : 'Completar'}</span>
@@ -212,18 +271,33 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           </div>
         </motion.div>
 
-        {/* Tarjeta deslizable */}
+        {/* 🎨 Tarjeta deslizable con personalización */}
         <motion.div
           drag={isSelectionMode ? false : 'x'}
           dragConstraints={{ left: 0, right: 0 }}
           dragElastic={0.1}
-          style={{ x }}
+          style={{ 
+            x,
+            backgroundColor,
+            borderBottom: `1px solid ${borderColorRgba}`,
+          }}
           onDragEnd={handleDragEnd}
           onClick={handleCardClick}
-          className={`p-4 transition-all duration-200 ${classes.bg.hover} border-b border-gray-100 dark:border-gray-800 last:border-b-0 cursor-pointer relative z-10`}
+          className={`
+            p-4 transition-all duration-200 
+            ${classes.bg.hover} 
+            last:border-b-0 cursor-pointer relative z-10
+            ${borderRadiusConfig.class}
+          `}
           whileTap={{ cursor: 'grabbing' }}
         >
-          <div className="flex items-start gap-4">
+          {/* Barra de color lateral */}
+          <div
+            className="absolute left-0 top-0 bottom-0 w-1.5"
+            style={{ backgroundColor: taskColor }}
+          />
+
+          <div className={`flex items-start ${sizeConfig.gap}`}>
             {/* Checkbox de selección o completado */}
             {isSelectionMode ? (
               <motion.button
@@ -257,6 +331,20 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                   <Circle size={20} className={`${classes.icon.secondary} hover:text-emerald-500 transition-colors`} />
                 )}
               </motion.button>
+            )}
+
+            {/* 🎨 Icono personalizado de la tarea */}
+            {hasCustomization && (
+              <div
+                className="flex-shrink-0 p-2 rounded-lg"
+                style={{ backgroundColor: hexToRgba(taskColor, bgOpacity * 2) }}
+              >
+                <IconMapper
+                  name={iconConfig.icon}
+                  size={sizeConfig.iconSize}
+                  className=""
+                />
+              </div>
             )}
             
             {/* Contenido principal */}
@@ -299,12 +387,14 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                 )}
               </div>
               
-              <h4 className={`text-base font-medium ${task.completed ? 'line-through ' + classes.text.muted : classes.text.primary}`}>
+              {/* 🎨 Título con tamaño personalizado */}
+              <h4 className={`${sizeConfig.titleSize} font-medium ${task.completed ? 'line-through ' + classes.text.muted : classes.text.primary}`}>
                 {task.title}
               </h4>
               
-              {task.description && (
-                <p className={`text-sm mt-1 line-clamp-2 ${task.completed ? classes.text.muted : classes.text.secondary}`}>
+              {/* 🎨 Descripción (visible según tamaño) */}
+              {task.description && taskSize !== 'sm' && (
+                <p className={`text-xs mt-1 line-clamp-2 ${task.completed ? classes.text.muted : classes.text.secondary}`}>
                   {task.description}
                 </p>
               )}
@@ -328,7 +418,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
                 }}
                 className="p-2 rounded-xl transition-all duration-300 flex-shrink-0"
                 style={{
-                  backgroundColor: `${priorityStyles.bg}`,
+                  backgroundColor: priorityStyles.bg,
                   color: priorityStyles.text,
                   border: `1px solid ${priorityStyles.border}`,
                 }}

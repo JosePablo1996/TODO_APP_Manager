@@ -6,6 +6,10 @@ import { useTasks } from '../hooks/useTasks';
 import { useThemeClasses } from '../hooks/useThemeClasses';
 import Header from '../components/Header';
 import LeftMenu from '../components/LeftMenu';
+import { TaskIconSelector } from '../components/tasks/TaskIconSelector';
+import { TaskSizeSelector } from '../components/tasks/TaskSizeSelector';
+import { TaskOpacitySelector } from '../components/tasks/TaskOpacitySelector';
+import { TaskPreview } from '../components/tasks/TaskPreview';
 import type { Notification } from '../components/Header';
 
 // Iconos
@@ -22,6 +26,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 // Tipos
 import type { Task } from '../types/task';
+import type {
+  TaskIconName,
+  TaskSizeValue,
+  TaskOpacityValue,
+  TaskBorderRadiusValue,
+} from '../data/taskCustomization';
+import { TASK_BORDER_RADIUS } from '../data/taskCustomization';
 
 // Colores predefinidos para las tareas
 const TASK_COLORS = [
@@ -52,6 +63,12 @@ const CreateTaskPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  // 🎨 Estados de personalización
+  const [selectedIcon, setSelectedIcon] = useState<TaskIconName>('CheckCircle');
+  const [selectedSize, setSelectedSize] = useState<TaskSizeValue>('md');
+  const [selectedOpacity, setSelectedOpacity] = useState<TaskOpacityValue>('medium');
+  const [selectedBorderRadius, setSelectedBorderRadius] = useState<TaskBorderRadiusValue>('medium');
+
   // Estados UI
   const [notifications] = useState<Notification[]>([]);
   const [isLeftMenuOpen, setIsLeftMenuOpen] = useState(false);
@@ -75,7 +92,12 @@ const CreateTaskPage: React.FC = () => {
         category,
         dueDate: dueDate || undefined,
         color: selectedColor.value,
-      });
+        icon: selectedIcon,
+        size: selectedSize,
+        opacity: selectedOpacity,
+        borderRadius: selectedBorderRadius,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any); // Temporal hasta que se actualice el tipo en useTasks
       
       navigate('/dashboard');
     } catch (err) {
@@ -109,20 +131,11 @@ const CreateTaskPage: React.FC = () => {
 
   if (!safeUser) return null;
 
-  const getPriorityBorderColor = () => {
-    switch (priority) {
-      case 'alta': return 'border-red-400 dark:border-red-600';
-      case 'media': return 'border-yellow-400 dark:border-yellow-600';
-      case 'baja': return 'border-green-400 dark:border-green-600';
-      default: return classes.border.primary;
-    }
-  };
-
   const isFormValid = title.trim().length > 0 && !isSubmitting;
 
   return (
     <div className={`min-h-screen ${classes.bg.primary} flex`}>
-      {/* LeftMenu - se superpone, no empuja el contenido */}
+      {/* LeftMenu */}
       <LeftMenu 
         isOpen={isLeftMenuOpen}
         onClose={toggleLeftMenu}
@@ -130,7 +143,6 @@ const CreateTaskPage: React.FC = () => {
         onLogout={handleLogout}
       />
 
-      {/* ✅ Contenido principal - SIEMPRE ocupa todo el ancho */}
       <div className="flex-1 flex flex-col transition-all duration-300">
         {/* Header */}
         <Header
@@ -306,9 +318,28 @@ const CreateTaskPage: React.FC = () => {
                         aria-label="Fecha límite"
                       />
                     </div>
+
+                    {/* 🎨 Selector de Icono */}
+                    <TaskIconSelector
+                      selectedIcon={selectedIcon}
+                      onSelectIcon={setSelectedIcon}
+                    />
+
+                    {/* 🎨 Selector de Tamaño */}
+                    <TaskSizeSelector
+                      selectedSize={selectedSize}
+                      onSelectSize={setSelectedSize}
+                    />
+
+                    {/* 🎨 Selector de Opacidad */}
+                    <TaskOpacitySelector
+                      selectedOpacity={selectedOpacity}
+                      onSelectOpacity={setSelectedOpacity}
+                      previewColor={selectedColor.value}
+                    />
                   </div>
 
-                  {/* Columna lateral - Color y Vista previa */}
+                  {/* Columna lateral - Personalización y Vista previa */}
                   <div className="lg:col-span-1 space-y-4 sm:space-y-5 md:space-y-6">
                     {/* Selector de color */}
                     <div className={`p-3 sm:p-4 md:p-5 rounded-lg sm:rounded-xl border-2 ${classes.bg.secondary} ${classes.border.primary}`}>
@@ -337,42 +368,71 @@ const CreateTaskPage: React.FC = () => {
                         ))}
                       </div>
                       <p className={`text-[9px] sm:text-[10px] md:text-xs mt-2 sm:mt-3 md:mt-4 text-center ${classes.text.muted}`}>
-                        Color seleccionado: <span style={{ color: selectedColor.value }} className="font-medium">{selectedColor.name}</span>
+                        Color seleccionado: <span className="font-medium" style={{ color: selectedColor.value }}>{selectedColor.name}</span>
                       </p>
                     </div>
 
-                    {/* Vista previa */}
-                    <div className={`p-3 sm:p-4 md:p-5 rounded-lg sm:rounded-xl border-2 ${getPriorityBorderColor()} ${selectedColor.bg} transition-all duration-300`}>
-                      <p className={`text-[9px] sm:text-[10px] md:text-xs font-semibold uppercase tracking-wider mb-2 sm:mb-3 ${selectedColor.text}`}>
-                        📋 Vista previa
-                      </p>
-                      <div className={`p-2.5 sm:p-3 md:p-4 rounded-lg sm:rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm shadow-inner`}>
-                        <h4 className={`font-semibold text-sm md:text-base truncate ${classes.text.primary}`}>
-                          {title || 'Título de la tarea'}
-                        </h4>
-                        {description && (
-                          <p className={`text-xs md:text-sm mt-1.5 sm:mt-2 ${classes.text.muted} line-clamp-2`}>
-                            {description}
-                          </p>
-                        )}
-                        <div className="flex flex-wrap gap-1 sm:gap-1.5 md:gap-2 mt-2 sm:mt-3 md:mt-4">
-                          <span className={`text-[9px] sm:text-[10px] md:text-xs px-2 sm:px-2.5 md:px-3 py-0.5 sm:py-1 md:py-1.5 rounded-full font-medium ${selectedColor.bg} ${selectedColor.text} border ${selectedColor.border}`}>
-                            {priority === 'alta' ? '🔴 Alta' : priority === 'media' ? '🟡 Media' : '🟢 Baja'}
-                          </span>
-                          <span className={`text-[9px] sm:text-[10px] md:text-xs px-2 sm:px-2.5 md:px-3 py-0.5 sm:py-1 md:py-1.5 rounded-full font-medium ${selectedColor.bg} ${selectedColor.text} border ${selectedColor.border}`}>
-                            {category === 'personal' && '👤 Personal'}
-                            {category === 'trabajo' && '💼 Trabajo'}
-                            {category === 'estudio' && '📚 Estudio'}
-                            {category === 'otro' && '📌 Otro'}
-                          </span>
-                          {dueDate && (
-                            <span className={`text-[9px] sm:text-[10px] md:text-xs px-2 sm:px-2.5 md:px-3 py-0.5 sm:py-1 md:py-1.5 rounded-full font-medium ${selectedColor.bg} ${selectedColor.text} border ${selectedColor.border}`}>
-                              📅 {new Date(dueDate + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
-                            </span>
-                          )}
-                        </div>
+                    {/* 🎨 Selector de Borde Redondeado */}
+                    <div className={`p-3 sm:p-4 md:p-5 rounded-lg sm:rounded-xl border-2 ${classes.bg.secondary} ${classes.border.primary}`}>
+                      <label className={`block text-[11px] sm:text-xs md:text-sm font-semibold mb-2 sm:mb-3 md:mb-4 ${classes.text.primary}`}>
+                        🔲 Estilo de borde
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {TASK_BORDER_RADIUS.map((borderStyle) => {
+                          const isSelected = selectedBorderRadius === borderStyle.value;
+                          return (
+                            <motion.button
+                              key={borderStyle.value}
+                              whileHover={{ scale: 1.03 }}
+                              whileTap={{ scale: 0.97 }}
+                              onClick={() => setSelectedBorderRadius(borderStyle.value)}
+                              className={`
+                                p-3 rounded-lg border-2 transition-all duration-200 text-center
+                                ${isSelected
+                                  ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 shadow-md ring-2 ring-emerald-500/30'
+                                  : `${classes.border.primary} ${classes.bg.card} hover:border-emerald-400`
+                                }
+                                ${borderStyle.value === 'none' ? 'rounded-none' : ''}
+                                ${borderStyle.value === 'medium' ? 'rounded-lg' : ''}
+                                ${borderStyle.value === 'large' ? 'rounded-xl' : ''}
+                                ${borderStyle.value === 'full' ? 'rounded-3xl' : ''}
+                              `}
+                              aria-label={`Seleccionar borde ${borderStyle.name}`}
+                              title={borderStyle.description}
+                            >
+                              <div className={`
+                                w-full h-8 mx-auto mb-1.5 border-2
+                                ${isSelected ? 'border-emerald-500 bg-emerald-500/20' : 'border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800'}
+                                ${borderStyle.value === 'none' ? 'rounded-none' : ''}
+                                ${borderStyle.value === 'medium' ? 'rounded-md' : ''}
+                                ${borderStyle.value === 'large' ? 'rounded-lg' : ''}
+                                ${borderStyle.value === 'full' ? 'rounded-2xl' : ''}
+                              `} />
+                              <span className={`text-[10px] sm:text-xs font-medium ${
+                                isSelected ? 'text-emerald-600 dark:text-emerald-400' : classes.text.muted
+                              }`}>
+                                {borderStyle.name}
+                              </span>
+                            </motion.button>
+                          );
+                        })}
                       </div>
                     </div>
+
+                    {/* 🎨 Vista previa unificada */}
+                    <TaskPreview
+                      title={title}
+                      description={description}
+                      priority={priority}
+                      category={category}
+                      dueDate={dueDate}
+                      icon={selectedIcon}
+                      size={selectedSize}
+                      opacity={selectedOpacity}
+                      borderRadius={selectedBorderRadius}
+                      color={selectedColor.value}
+                      showBadges={true}
+                    />
                   </div>
                 </div>
 

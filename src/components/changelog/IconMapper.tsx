@@ -5,7 +5,11 @@ import {
   SmartphoneNfc, Key, Shield, Fingerprint, LogOut, Bell,
   Clock, MonitorSmartphone, Menu, Eye, Wifi, Zap, Sparkles,
   Palette, Globe, Database, Code, Heart, Tag, Star,
-  BarChart, ShieldCheck, Rocket
+  BarChart, ShieldCheck, Rocket,
+  // 🎨 NUEVOS: Iconos para personalización de tareas
+  CheckCircle, Users, Lightbulb, ShoppingCart, Phone,
+  FileText, Plane, BookOpen, Droplets, Droplet, Waves,
+  Rows, Maximize2
 } from 'lucide-react';
 
 // ============================================
@@ -15,6 +19,7 @@ import {
 // Esto permite referenciar iconos dinámicamente desde los datos
 
 const iconMap: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+  // Iconos existentes (changelog y UI general)
   RefreshCw,
   Save,
   AlertTriangle,
@@ -33,7 +38,7 @@ const iconMap: Record<string, React.ComponentType<{ size?: number; className?: s
   LogOut,
   Bell,
   Clock,
-  MonitorSmartphone, // Reemplaza a DevicePhone (no existe en lucide-react)
+  MonitorSmartphone,
   Menu,
   Eye,
   Wifi,
@@ -49,6 +54,26 @@ const iconMap: Record<string, React.ComponentType<{ size?: number; className?: s
   BarChart,
   ShieldCheck,
   Rocket,
+
+  // 🎨 NUEVOS: Iconos para el selector de iconos de tareas (TaskIconSelector)
+  CheckCircle,      // Tarea general
+  Users,            // Reunión
+  Lightbulb,        // Idea
+  ShoppingCart,     // Compra
+  Phone,            // Llamada
+  FileText,         // Documento
+  Plane,            // Viaje
+  BookOpen,         // Libro/Estudio
+
+  // 🎨 NUEVOS: Iconos para el selector de opacidad (TaskOpacitySelector)
+  Droplets,         // Sutil (baja opacidad)
+  Droplet,          // Medio (opacidad media)
+  Waves,            // Intenso (alta opacidad)
+
+  // 🎨 NUEVOS: Iconos para el selector de tamaño (TaskSizeSelector)
+  Rows,             // Compacto
+  Maximize2,        // Expandido
+  // LayoutGrid ya existe arriba para tamaño Normal
 };
 
 // ============================================
@@ -73,12 +98,17 @@ interface IconMapperProps {
  * 
  * Componente utilitario que renderiza un icono de Lucide React
  * basado en su nombre (string). Esto permite que los datos del
- * changelog referencien iconos sin importar componentes directamente.
+ * changelog y los selectores de personalización referencien iconos
+ * sin importar componentes directamente.
+ * 
+ * Iconos disponibles: 47 iconos de Lucide React
  * 
  * @example
  * <IconMapper name="RefreshCw" size={20} className="text-teal-500" />
+ * <IconMapper name="CheckCircle" size={18} />
+ * <IconMapper name="Droplets" size={16} />
  * 
- * @param name - Nombre del icono (ej: 'RefreshCw', 'Bug', 'Shield')
+ * @param name - Nombre del icono (ej: 'RefreshCw', 'Bug', 'Shield', 'CheckCircle')
  * @param size - Tamaño en píxeles (opcional, default: 18)
  * @param className - Clases CSS adicionales (opcional)
  * @returns Componente del icono o null si no se encuentra
