@@ -590,7 +590,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, user, onLogout }) 
             <div className="flex items-center justify-center gap-1">
               <Sparkles className="w-3 h-3 text-emerald-400" />
               <p className="text-xs text-center text-gray-500">
-                TodoAppManager v2.5.0 · Supabase Edition
+                TodoAppManager v2.6.0 · Supabase Edition
               </p>
             </div>
             <p className="text-xs text-center text-gray-600 mt-1">

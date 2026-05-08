@@ -25,8 +25,16 @@ import {
   Lightbulb,
   Rocket,
   Clock,
-  Target
-} from 'lucide-react';
+  Target,
+  Info,
+  LayoutGrid,
+  Smartphone,
+  Cloud,
+  Fingerprint,
+  Bell,
+  RefreshCw,
+  Save,
+  BarChart} from 'lucide-react';
 
 // ============================================
 // COMPONENTES AUXILIARES
@@ -291,8 +299,68 @@ const HelpPage: React.FC = () => {
   const navigate = useNavigate();
   const classes = useThemeClasses();
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'guia' | 'faq' | 'contacto'>('guia');
+  const [activeTab, setActiveTab] = useState<'acerca' | 'guia' | 'faq' | 'contacto'>('acerca');
   const [activeModal, setActiveModal] = useState<string | null>(null);
+
+  // Características principales de TodoAppManager
+  const features = [
+    {
+      icon: <LayoutGrid className="w-5 h-5 text-emerald-500" />,
+      iconColor: 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20',
+      title: 'Gestión de Tareas',
+      description: 'Crea, edita, organiza y prioriza tus tareas diarias con un sistema intuitivo de arrastrar y soltar.',
+      details: 'Categoriza por Personal, Trabajo, Estudio y más. Establece prioridades y fechas límite.',
+    },
+    {
+      icon: <Smartphone className="w-5 h-5 text-teal-500" />,
+      iconColor: 'bg-gradient-to-br from-teal-500/20 to-cyan-500/20',
+      title: 'Multiplataforma',
+      description: 'Accede a tus tareas desde cualquier dispositivo. Sincronización en tiempo real entre web y móvil.',
+      details: 'Disponible en navegador web y aplicación móvil. Tus datos siempre actualizados.',
+    },
+    {
+      icon: <Cloud className="w-5 h-5 text-cyan-500" />,
+      iconColor: 'bg-gradient-to-br from-cyan-500/20 to-blue-500/20',
+      title: 'Sincronización en la Nube',
+      description: 'Todas tus tareas se sincronizan automáticamente con el backend. Nunca pierdes tu información.',
+      details: 'Backup automático, restauración de datos y exportación/importación de tareas en formato JSON.',
+    },
+    {
+      icon: <Fingerprint className="w-5 h-5 text-indigo-500" />,
+      iconColor: 'bg-gradient-to-br from-indigo-500/20 to-purple-500/20',
+      title: 'Seguridad Avanzada',
+      description: 'Protege tu cuenta con autenticación biométrica, 2FA y códigos OTP por email.',
+      details: 'Passkeys, autenticación de dos factores (TOTP), inicio de sesión sin contraseña y más.',
+    },
+    {
+      icon: <Bell className="w-5 h-5 text-amber-500" />,
+      iconColor: 'bg-gradient-to-br from-amber-500/20 to-orange-500/20',
+      title: 'Notificaciones',
+      description: 'Recibe alertas cuando crees, actualices o completes tareas. Mantente al día.',
+      details: 'Sistema de notificaciones en tiempo real con indicador de no leídas.',
+    },
+    {
+      icon: <RefreshCw className="w-5 h-5 text-purple-500" />,
+      iconColor: 'bg-gradient-to-br from-purple-500/20 to-pink-500/20',
+      title: 'Papelera y Recuperación',
+      description: 'Elimina tareas con soft delete. Recupéralas de la papelera cuando lo necesites.',
+      details: 'Las tareas eliminadas se conservan 30 días. Eliminación masiva y restauración con un clic.',
+    },
+    {
+      icon: <Save className="w-5 h-5 text-green-500" />,
+      iconColor: 'bg-gradient-to-br from-green-500/20 to-emerald-500/20',
+      title: 'Copia de Seguridad',
+      description: 'Realiza backups completos de tus tareas con un solo clic. Restaura cuando quieras.',
+      details: 'Backup automático con barra de progreso, exportación manual a JSON e importación.',
+    },
+    {
+      icon: <BarChart className="w-5 h-5 text-blue-500" />,
+      iconColor: 'bg-gradient-to-br from-blue-500/20 to-cyan-500/20',
+      title: 'Estadísticas y Calendario',
+      description: 'Visualiza tu productividad con gráficos. Organiza tus tareas en el calendario.',
+      details: 'Dashboard de estadísticas, vista semanal/mensual, racha de productividad y más.',
+    },
+  ];
 
   // Guías rápidas con contenido detallado
   const quickGuides = [
@@ -425,10 +493,20 @@ const HelpPage: React.FC = () => {
     {
       question: '🗑️ ¿Cómo elimino o archivo una tarea?',
       answer: [
-        'En la lista de tareas, busca el ícono de papelera para eliminar',
-        'O usa el ícono de archivo para moverla a archivados',
-        'Las tareas eliminadas van a la papelera por 30 días',
+        'Desliza la tarea hacia la izquierda para eliminarla',
+        'O usa el checkbox para seleccionar múltiples tareas y eliminarlas',
+        'Las tareas eliminadas van a la papelera',
         'Puedes recuperarlas desde la sección de Papelera',
+      ],
+    },
+    {
+      question: '💾 ¿Cómo hago una copia de seguridad de mis tareas?',
+      answer: [
+        'Ve a Configuración > Copia de Seguridad',
+        'Usa "Backup Automático" para guardar todas tus tareas',
+        'O "Exportar Manual" para descargar un archivo JSON',
+        'Puedes restaurar tus tareas desde cualquier backup guardado',
+        'También puedes importar tareas desde un archivo JSON',
       ],
     },
     {
@@ -446,6 +524,15 @@ const HelpPage: React.FC = () => {
         'Desde el menú lateral, selecciona "Estadísticas"',
         'Podrás ver tu progreso, tareas completadas y productividad',
         'Los gráficos te muestran tu rendimiento semanal y mensual',
+      ],
+    },
+    {
+      question: '📱 ¿La app funciona en el móvil?',
+      answer: [
+        '¡Sí! TodoAppManager es completamente responsive',
+        'Accede desde tu navegador móvil a la misma URL',
+        'Todas las funcionalidades están optimizadas para pantallas táctiles',
+        'Usa gestos swipe para completar o eliminar tareas rápidamente',
       ],
     },
   ];
@@ -563,9 +650,10 @@ const HelpPage: React.FC = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className={`flex gap-2 p-1.5 rounded-xl border ${classes.bg.card} ${classes.border.primary} shadow-md`}
+            className={`flex gap-2 p-1.5 rounded-xl border ${classes.bg.card} ${classes.border.primary} shadow-md overflow-x-auto`}
           >
             {[
+              { id: 'acerca', icon: Info, label: 'Acerca de' },
               { id: 'guia', icon: BookOpen, label: 'Guías Rápidas' },
               { id: 'faq', icon: MessageCircle, label: 'Preguntas Frecuentes' },
               { id: 'contacto', icon: Mail, label: 'Contacto' }
@@ -575,7 +663,7 @@ const HelpPage: React.FC = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
+                className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg'
                     : `${classes.text.secondary} hover:${classes.bg.hover}`
@@ -591,6 +679,107 @@ const HelpPage: React.FC = () => {
 
           {/* Contenido según tab */}
           <AnimatePresence mode="wait">
+            {/* NUEVA SECCIÓN: ACERCA DE TODOAPPMANAGER */}
+            {activeTab === 'acerca' && (
+              <motion.div
+                key="acerca"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                className="space-y-6"
+              >
+                <SectionHeader title="¿Qué es TodoAppManager?" icon={<Info size={14} />} />
+                
+                {/* Descripción principal */}
+                <GlassCard>
+                  <div className="p-6 md:p-8">
+                    <div className="flex items-start gap-4 mb-6">
+                      <motion.div 
+                        whileHover={{ rotate: 10 }}
+                        className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 shadow-xl flex-shrink-0"
+                      >
+                        <LayoutGrid className="w-8 h-8 text-white" />
+                      </motion.div>
+                      <div>
+                        <h3 className={`text-xl font-bold mb-3 ${classes.text.primary}`}>
+                          Tu gestor de tareas inteligente
+                        </h3>
+                        <p className={`text-sm leading-relaxed ${classes.text.secondary}`}>
+                          <strong className={classes.text.primary}>TodoAppManager</strong> es una aplicación web y móvil 
+                          diseñada para ayudarte a organizar tu vida diaria. Gestiona tus tareas personales, laborales 
+                          y de estudio en un solo lugar, con sincronización en tiempo real entre todos tus dispositivos.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className={`p-5 rounded-xl border ${classes.bg.secondary} ${classes.border.primary} mb-6`}>
+                      <p className={`text-sm leading-relaxed ${classes.text.secondary}`}>
+                        Desarrollada con tecnologías modernas como <strong className={classes.text.primary}>React + TypeScript</strong> en el 
+                        frontend y <strong className={classes.text.primary}>FastAPI + Supabase</strong> en el backend, TodoAppManager 
+                        ofrece una experiencia fluida, segura y responsive. La aplicación incluye autenticación avanzada 
+                        con Passkeys biométricas, verificación en dos pasos (2FA), inicio de sesión sin contraseña por 
+                        OTP, copias de seguridad, papelera con soft delete, estadísticas de productividad y mucho más.
+                      </p>
+                    </div>
+
+                    {/* Características principales */}
+                    <h4 className={`font-semibold mb-4 flex items-center gap-2 ${classes.text.primary}`}>
+                      <Sparkles size={18} className="text-emerald-500" />
+                      Características principales
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {features.map((feature, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          whileHover={{ scale: 1.02 }}
+                          className={`p-4 rounded-xl border transition-all ${classes.bg.card} ${classes.border.primary} hover:shadow-md`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className={`p-2.5 rounded-lg ${feature.iconColor} flex-shrink-0`}>
+                              {feature.icon}
+                            </div>
+                            <div>
+                              <h5 className={`font-semibold text-sm ${classes.text.primary}`}>{feature.title}</h5>
+                              <p className={`text-xs mt-1 ${classes.text.muted} leading-relaxed`}>{feature.description}</p>
+                              <p className={`text-xs mt-1.5 ${classes.text.secondary} leading-relaxed`}>{feature.details}</p>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                </GlassCard>
+
+                {/* Versión y tecnología */}
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className={`p-6 rounded-xl border bg-gradient-to-br from-emerald-500/5 to-cyan-500/5 ${classes.border.primary}`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/20">
+                      <Info className="w-6 h-6 text-emerald-500" />
+                    </div>
+                    <div>
+                      <h3 className={`font-semibold text-base ${classes.text.primary}`}>
+                        Versión actual: v2.6.0
+                      </h3>
+                      <p className={`text-sm mt-1 ${classes.text.muted} leading-relaxed`}>
+                        Esta versión incluye sincronización completa con backend, sistema de copia de seguridad 
+                        (backup/restore), eliminación masiva con swipe, reset de contraseña por OTP y múltiples 
+                        mejoras de rendimiento y seguridad. Desarrollada con React 18, TypeScript, FastAPI, 
+                        Supabase y Tailwind CSS.
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+
             {activeTab === 'guia' && (
               <motion.div
                 key="guia"
@@ -700,7 +889,7 @@ const HelpPage: React.FC = () => {
                       </p>
                     </div>
 
-                    {/* ✅ DATOS DE CONTACTO ACTUALIZADOS */}
+                    {/* Datos de contacto */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <motion.a
                         whileHover={{ scale: 1.02, y: -2 }}
@@ -787,7 +976,7 @@ const HelpPage: React.FC = () => {
                 <Heart className="w-5 h-5 text-pink-500 fill-pink-500" />
               </motion.div>
               <span className={`text-sm ${classes.text.secondary}`}>
-                Centro de ayuda de TodoAppManager v2.5.0 - Supabase Edition
+                Centro de ayuda de TodoAppManager v2.6.0 - Supabase Edition
               </span>
               <motion.div
                 animate={{ scale: [1, 1.2, 1] }}

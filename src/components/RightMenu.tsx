@@ -342,7 +342,7 @@ const RightMenu: React.FC<RightMenuProps> = ({
         {
           icon: <Clock className="w-5 h-5" />,
           label: 'Cambios recientes',
-          description: 'v2.5.0 · Novedades',
+          description: 'v2.6.0 · Novedades',
           onClick: () => navigate('/changelog'),
           color: 'gray',
         },
@@ -572,7 +572,7 @@ const RightMenu: React.FC<RightMenuProps> = ({
             <div className="flex items-center justify-center gap-1">
               <Sparkles className="w-3 h-3 text-emerald-400" />
               <p className={`text-xs text-center ${classes.text.muted}`}>
-                TodoAppManager v2.5.0 · Supabase Edition
+                TodoAppManager v2.6.0 · Supabase Edition
               </p>
             </div>
             <p className={`text-xs text-center ${classes.text.muted} mt-1`}>

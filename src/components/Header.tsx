@@ -476,7 +476,7 @@ const Header: React.FC<HeaderProps> = ({
             
             {/* Búsqueda móvil */}
             <div className="relative">
-              <Search className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={14} className="sm:w-[16px] sm:h-[16px]" />
+              <Search className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px]" />
               <input
                 type="text"
                 value={searchQuery}

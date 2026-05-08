@@ -90,7 +90,6 @@ const PublicRoute: React.FC<PublicRouteProps> = ({ children, allowAuthenticated 
   const { isAuthenticated, loading } = useAuthContext();
   const location = useLocation();
 
-  // ✅ CORREGIDO: Todos los paths retornan explícitamente
   if (loading) {
     return <LoadingScreen message="Cargando..." />;
   }
@@ -153,9 +152,14 @@ const SessionExpiredHandler: React.FC = () => {
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
+      {/* Ruta raíz con Splash Screen */}
       <Route path="/" element={<RootRoute />} />
 
-      {/* Rutas Públicas */}
+      {/* ============================================ */}
+      {/* RUTAS PÚBLICAS (sin autenticación)            */}
+      {/* ============================================ */}
+      
+      {/* Inicio de sesión */}
       <Route
         path="/login"
         element={
@@ -164,6 +168,8 @@ const AppRoutes: React.FC = () => {
           </PublicRoute>
         }
       />
+      
+      {/* Registro */}
       <Route
         path="/register"
         element={
@@ -173,7 +179,7 @@ const AppRoutes: React.FC = () => {
         }
       />
 
-      {/* Página de inicio de sesión con OTP por email */}
+      {/* Inicio de sesión con OTP por email (sin contraseña) */}
       <Route
         path="/email-otp"
         element={
@@ -183,7 +189,7 @@ const AppRoutes: React.FC = () => {
         }
       />
 
-      {/* Rutas de recuperación de contraseña */}
+      {/* Recuperación de contraseña (permitir usuarios autenticados también) */}
       <Route
         path="/forgot-password"
         element={
@@ -192,6 +198,8 @@ const AppRoutes: React.FC = () => {
           </PublicRoute>
         }
       />
+      
+      {/* Reset de contraseña con OTP (permitir usuarios autenticados también) */}
       <Route
         path="/reset-password"
         element={
@@ -201,32 +209,162 @@ const AppRoutes: React.FC = () => {
         }
       />
 
-      {/* Copia de Seguridad */}
-      <Route
-        path="/backup"
+      {/* ============================================ */}
+      {/* RUTAS PROTEGIDAS (requieren autenticación)    */}
+      {/* ============================================ */}
+
+      {/* Dashboard principal */}
+      <Route 
+        path="/dashboard" 
+        element={
+          <PrivateRoute>
+            <ProtectedPage />
+          </PrivateRoute>
+        } 
+      />
+      
+      {/* Alias: /tareas redirige al dashboard */}
+      <Route 
+        path="/tareas" 
+        element={
+          <PrivateRoute>
+            <ProtectedPage />
+          </PrivateRoute>
+        } 
+      />
+
+      {/* Gestión de tareas */}
+      <Route 
+        path="/crear-tarea" 
+        element={
+          <PrivateRoute>
+            <CreateTaskPage />
+          </PrivateRoute>
+        } 
+      />
+      
+      <Route 
+        path="/editar-tarea/:id" 
+        element={
+          <PrivateRoute>
+            <EditTaskPage />
+          </PrivateRoute>
+        } 
+      />
+
+      {/* Papelera (Soft Delete) */}
+      <Route 
+        path="/papelera" 
+        element={
+          <PrivateRoute>
+            <TrashPage />
+          </PrivateRoute>
+        } 
+      />
+
+      {/* Favoritos */}
+      <Route 
+        path="/favoritos" 
+        element={
+          <PrivateRoute>
+            <FavoritePage />
+          </PrivateRoute>
+        } 
+      />
+
+      {/* Archivados */}
+      <Route 
+        path="/archivados" 
+        element={
+          <PrivateRoute>
+            <ArchivedPage />
+          </PrivateRoute>
+        } 
+      />
+
+      {/* Calendario */}
+      <Route 
+        path="/calendario" 
+        element={
+          <PrivateRoute>
+            <CalendarPage />
+          </PrivateRoute>
+        } 
+      />
+
+      {/* Estadísticas */}
+      <Route 
+        path="/estadisticas" 
+        element={
+          <PrivateRoute>
+            <StatisticsPage />
+          </PrivateRoute>
+        } 
+      />
+
+      {/* Perfil de usuario */}
+      <Route 
+        path="/perfil" 
+        element={
+          <PrivateRoute>
+            <ProfilePage />
+          </PrivateRoute>
+        } 
+      />
+
+      {/* Configuración y Seguridad */}
+      <Route 
+        path="/configuracion" 
+        element={
+          <PrivateRoute>
+            <SettingsPage />
+          </PrivateRoute>
+        } 
+      />
+
+      {/* Copia de Seguridad (Backup/Restore) - v2.6.0 */}
+      <Route 
+        path="/backup" 
         element={
           <PrivateRoute>
             <BackupPage />
           </PrivateRoute>
-        }
+        } 
       />
 
-      {/* Rutas Protegidas */}
-      <Route path="/dashboard" element={<PrivateRoute><ProtectedPage /></PrivateRoute>} />
-      <Route path="/tareas" element={<PrivateRoute><ProtectedPage /></PrivateRoute>} />
-      <Route path="/crear-tarea" element={<PrivateRoute><CreateTaskPage /></PrivateRoute>} />
-      <Route path="/editar-tarea/:id" element={<PrivateRoute><EditTaskPage /></PrivateRoute>} />
-      <Route path="/papelera" element={<PrivateRoute><TrashPage /></PrivateRoute>} />
-      <Route path="/favoritos" element={<PrivateRoute><FavoritePage /></PrivateRoute>} />
-      <Route path="/archivados" element={<PrivateRoute><ArchivedPage /></PrivateRoute>} />
-      <Route path="/calendario" element={<PrivateRoute><CalendarPage /></PrivateRoute>} />
-      <Route path="/estadisticas" element={<PrivateRoute><StatisticsPage /></PrivateRoute>} />
-      <Route path="/perfil" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
-      <Route path="/configuracion" element={<PrivateRoute><SettingsPage /></PrivateRoute>} />
-      <Route path="/developer" element={<PrivateRoute><DeveloperPage /></PrivateRoute>} />
-      <Route path="/changelog" element={<PrivateRoute><ChangelogPage /></PrivateRoute>} />
-      <Route path="/ayuda" element={<PrivateRoute><HelpPage /></PrivateRoute>} />
+      {/* Información del Desarrollador */}
+      <Route 
+        path="/developer" 
+        element={
+          <PrivateRoute>
+            <DeveloperPage />
+          </PrivateRoute>
+        } 
+      />
 
+      {/* Historial de Cambios (Changelog) */}
+      <Route 
+        path="/changelog" 
+        element={
+          <PrivateRoute>
+            <ChangelogPage />
+          </PrivateRoute>
+        } 
+      />
+
+      {/* Centro de Ayuda */}
+      <Route 
+        path="/ayuda" 
+        element={
+          <PrivateRoute>
+            <HelpPage />
+          </PrivateRoute>
+        } 
+      />
+
+      {/* ============================================ */}
+      {/* RUTA 404 - Cualquier ruta no encontrada       */}
+      {/* ============================================ */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
