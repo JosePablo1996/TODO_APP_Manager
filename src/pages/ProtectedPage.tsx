@@ -218,7 +218,7 @@ const ProtectedPage: React.FC = () => {
   const [isLeftMenuOpen, setIsLeftMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
-  // ✅ Nuevos estados para selección masiva
+  // ✅ Estados para selección masiva
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(new Set());
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
@@ -581,7 +581,7 @@ const ProtectedPage: React.FC = () => {
               onComplete={() => setShowConfetti(false)} 
             />
 
-            {/* Tabs de navegación - SIN BORDE */}
+            {/* Tabs de navegación */}
             <div className={`flex gap-1 p-0.5 rounded-lg mb-2 ${classes.bg.card}`}>
               <button
                 onClick={() => setActiveTab('tasks')}
@@ -678,7 +678,7 @@ const ProtectedPage: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Filtros rápidos - solo si hay tareas - SIN BORDE */}
+                  {/* Filtros rápidos - solo si hay tareas */}
                   {stats.total > 0 && (
                     <div className={`rounded-lg shadow-sm p-1.5 mb-2 ${classes.bg.card}`}>
                       <div className="flex items-center justify-between mb-1 flex-wrap gap-1">
@@ -721,6 +721,7 @@ const ProtectedPage: React.FC = () => {
                               </button>
                             </>
                           )}
+                          {/* ✅ ViewToggle siempre visible */}
                           {!isSelectionMode && <ViewToggle viewMode={viewMode} onViewChange={setViewMode} />}
                           <select
                             value={`${sortBy}-${sortOrder}`}
@@ -752,7 +753,7 @@ const ProtectedPage: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Lista de tareas - SIN BORDE */}
+                  {/* Lista de tareas */}
                   <div className={`rounded-lg shadow-sm overflow-hidden ${classes.bg.card}`}>
                     {stats.total > 0 ? (
                       <>
@@ -789,6 +790,7 @@ const ProtectedPage: React.FC = () => {
                             </button>
                           </div>
                         ) : viewMode === 'list' ? (
+                          /* ✅ VISTA LISTA: Siempre 1 columna */
                           <div className={`divide-y ${classes.border.primary}`}>
                             <AnimatePresence>
                               {filteredTasks.map((task, index) => (
@@ -807,7 +809,8 @@ const ProtectedPage: React.FC = () => {
                             </AnimatePresence>
                           </div>
                         ) : (
-                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5 p-1.5">
+                          /* ✅ VISTA GRID: 2 columnas en móvil, 3 en escritorio */
+                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-1.5 p-1.5">
                             <AnimatePresence>
                               {filteredTasks.map((task, index) => (
                                 <TaskCard
