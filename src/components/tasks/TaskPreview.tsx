@@ -81,17 +81,8 @@ const getRgbaColor = (hex: string, opacity: number): string => {
  * con todas las personalizaciones aplicadas (icono, tamaño, opacidad,
  * borde redondeado y color).
  * 
- * @example
- * <TaskPreview
- *   title="Mi tarea"
- *   icon="Star"
- *   size="md"
- *   opacity="medium"
- *   borderRadius="medium"
- *   color="#10b981"
- *   priority="alta"
- *   category="personal"
- * />
+ * La vista previa ahora tiñe completamente el fondo con el color
+ * seleccionado, igual que TaskItem y TaskCard.
  */
 export const TaskPreview: React.FC<TaskPreviewProps> = ({
   title = '',
@@ -116,31 +107,34 @@ export const TaskPreview: React.FC<TaskPreviewProps> = ({
   const opacityConfig = getOpacityConfig(opacity);
   const borderRadiusConfig = getBorderRadiusConfig(borderRadius);
 
-  // Calcular opacidades
-  const bgOpacityValue = parseFloat(opacityConfig.bgOpacity);
-  const borderOpacityValue = parseFloat(opacityConfig.borderOpacity);
+  // 🎨 CORREGIDO: Aumentar opacidad para que el color sea más visible
+  const bgOpacity = parseFloat(opacityConfig.bgOpacity) * 3;
+  const borderOpacity = parseFloat(opacityConfig.borderOpacity) * 3;
 
   // Colores calculados
-  const borderColorRgba = getRgbaColor(color, borderOpacityValue);
+  const backgroundColor = getRgbaColor(color, Math.min(bgOpacity, 0.4));
+  const borderColorRgba = getRgbaColor(color, Math.min(borderOpacity, 0.6));
+  const iconBgColor = getRgbaColor(color, Math.min(bgOpacity * 1.5, 0.5));
+  const badgeBgColor = getRgbaColor(color, Math.min(bgOpacity * 1.5, 0.35));
 
   // Determinar color de borde según prioridad
   const getPriorityBorderColor = (): string => {
     switch (priority) {
-      case 'alta': return getRgbaColor('#ef4444', borderOpacityValue);
-      case 'media': return getRgbaColor('#f59e0b', borderOpacityValue);
-      case 'baja': return getRgbaColor('#10b981', borderOpacityValue);
-      default: return borderColorRgba;
+      case 'alta': return '#ef4444';
+      case 'media': return '#f59e0b';
+      case 'baja': return '#10b981';
+      default: return color;
     }
   };
 
-  // Obtener emoji y etiqueta de prioridad
+  // Configuración de prioridad
   const priorityConfig = {
     alta: { emoji: '🔴', label: 'Alta', colorHex: '#ef4444' },
     media: { emoji: '🟡', label: 'Media', colorHex: '#f59e0b' },
     baja: { emoji: '🟢', label: 'Baja', colorHex: '#10b981' },
   }[priority];
 
-  // Obtener emoji y etiqueta de categoría
+  // Configuración de categoría
   const categoryConfig = {
     personal: { emoji: '👤', label: 'Personal' },
     trabajo: { emoji: '💼', label: 'Trabajo' },
@@ -155,157 +149,139 @@ export const TaskPreview: React.FC<TaskPreviewProps> = ({
         📋 Vista previa
       </label>
 
-      {/* Tarjeta de preview */}
+      {/* 🎨 Tarjeta de preview CON FONDO DE COLOR VISIBLE */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         className={`
           relative overflow-hidden transition-all duration-300
           ${borderRadiusConfig.class}
-          ${sizeConfig.cardHeight}
-          ${sizeConfig.cardPadding}
-          ${classes.bg.card}
         `}
-        style={{
-          backgroundColor: color,
-          '--bg-opacity': bgOpacityValue,
-          '--border-opacity': borderOpacityValue,
-          '--task-color': color,
-          '--priority-border-color': getPriorityBorderColor(),
-          borderLeft: `3px solid ${getPriorityBorderColor()}`,
-          border: `1px solid ${borderColorRgba}`,
-        } as React.CSSProperties}
       >
-        {/* Barra de color lateral */}
-        <div
-          className="absolute left-0 top-0 bottom-0 w-1.5"
-          style={{ backgroundColor: color }}
-        />
-
-        {/* Overlay de opacidad para el fondo */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundColor: getRgbaColor(color, bgOpacityValue),
+        {/* 🎨 CAPA DE FONDO CON COLOR (siempre visible) */}
+        <div 
+          className={`absolute inset-0 ${borderRadiusConfig.class}`}
+          style={{ 
+            backgroundColor: backgroundColor,
+            border: `1px solid ${borderColorRgba}`,
           }}
         />
 
-        {/* Contenido de la tarjeta */}
-        <div className={`relative flex ${sizeConfig.gap} pl-2`}>
-          {/* Icono de la tarea */}
-          <div
-            className="flex-shrink-0 p-2 rounded-lg"
-            style={{
-              backgroundColor: getRgbaColor(color, bgOpacityValue * 2),
-            }}
-          >
-            <IconMapper
-              name={iconConfig.icon}
-              size={sizeConfig.iconSize}
-              className=""
-            />
-          </div>
+        {/* 🎨 BARRA LATERAL DE COLOR (viñeta) */}
+        <div
+          className={`absolute left-0 top-0 bottom-0 w-2 ${borderRadiusConfig.class === 'rounded-none' ? '' : 'rounded-l-lg'}`}
+          style={{ backgroundColor: getPriorityBorderColor() }}
+        />
 
-          {/* Información de la tarea */}
-          <div className="flex-1 min-w-0">
-            {/* Título */}
-            <h4
-              className={`font-semibold ${sizeConfig.titleSize} ${classes.text.primary} truncate`}
-              style={{
-                textDecoration: completed ? 'line-through' : 'none',
-                opacity: completed ? 0.6 : 1,
-              }}
+        {/* CONTENIDO DE LA TARJETA (sobre el fondo de color) */}
+        <div className={`relative ${sizeConfig.cardPadding}`}>
+          <div className={`flex ${sizeConfig.gap}`}>
+            {/* Icono de la tarea */}
+            <div
+              className="flex-shrink-0 p-2 rounded-lg relative z-10"
+              style={{ backgroundColor: iconBgColor }}
             >
-              {title || 'Título de la tarea'}
-            </h4>
+              <IconMapper
+                name={iconConfig.icon}
+                size={sizeConfig.iconSize}
+                className=""
+              />
+            </div>
 
-            {/* Descripción (solo en tamaños md y lg) */}
-            {size !== 'sm' && description && (
-              <p className={`text-xs mt-1 ${classes.text.muted} line-clamp-2`}>
-                {description}
-              </p>
-            )}
+            {/* Información de la tarea */}
+            <div className="flex-1 min-w-0 relative z-10">
+              {/* Título */}
+              <h4
+                className={`font-semibold ${sizeConfig.titleSize} ${classes.text.primary} truncate`}
+                style={{
+                  textDecoration: completed ? 'line-through' : 'none',
+                  opacity: completed ? 0.6 : 1,
+                }}
+              >
+                {title || 'Título de la tarea'}
+              </h4>
 
-            {/* Descripción placeholder cuando no hay */}
-            {size !== 'sm' && !description && (
-              <p className={`text-xs mt-1 ${classes.text.muted} italic`}>
-                Sin descripción
-              </p>
-            )}
+              {/* Descripción (visible según tamaño) */}
+              {size !== 'sm' && (
+                <p className={`text-xs mt-1 ${classes.text.muted} line-clamp-2`}>
+                  {description || 'Sin descripción'}
+                </p>
+              )}
 
-            {/* Badges de prioridad y categoría */}
-            {showBadges && (
-              <div className={`flex flex-wrap ${sizeConfig.gap} mt-2`}>
-                {/* Badge de prioridad */}
-                <span
-                  className={`${sizeConfig.badgeSize} rounded-full font-medium flex items-center gap-1`}
-                  style={{
-                    backgroundColor: getRgbaColor(priorityConfig.colorHex, bgOpacityValue * 1.5),
-                    color: classes.text.primary,
-                  }}
-                >
-                  <span>{priorityConfig.emoji}</span>
-                  <span>{priorityConfig.label}</span>
-                </span>
-
-                {/* Badge de categoría */}
-                <span
-                  className={`${sizeConfig.badgeSize} rounded-full font-medium flex items-center gap-1`}
-                  style={{
-                    backgroundColor: getRgbaColor(color, bgOpacityValue * 1.5),
-                    color: classes.text.primary,
-                  }}
-                >
-                  <span>{categoryConfig.emoji}</span>
-                  <span>{categoryConfig.label}</span>
-                </span>
-
-                {/* Badge de fecha */}
-                {dueDate && (
+              {/* Badges de prioridad y categoría */}
+              {showBadges && (
+                <div className={`flex flex-wrap ${sizeConfig.gap} mt-2`}>
+                  {/* Badge de prioridad */}
                   <span
-                    className={`${sizeConfig.badgeSize} rounded-full font-medium flex items-center gap-1`}
+                    className={`${sizeConfig.badgeSize} rounded-full font-medium flex items-center gap-1 relative z-10`}
                     style={{
-                      backgroundColor: getRgbaColor(color, bgOpacityValue * 1.5),
+                      backgroundColor: getRgbaColor(priorityConfig.colorHex, 0.15),
                       color: classes.text.primary,
                     }}
                   >
-                    <span>📅</span>
-                    <span>
-                      {new Date(dueDate + 'T00:00:00').toLocaleDateString('es-ES', {
-                        day: '2-digit',
-                        month: 'short',
-                      })}
-                    </span>
+                    <span>{priorityConfig.emoji}</span>
+                    <span>{priorityConfig.label}</span>
                   </span>
-                )}
+
+                  {/* Badge de categoría */}
+                  <span
+                    className={`${sizeConfig.badgeSize} rounded-full font-medium flex items-center gap-1 relative z-10`}
+                    style={{
+                      backgroundColor: badgeBgColor,
+                      color: classes.text.primary,
+                    }}
+                  >
+                    <span>{categoryConfig.emoji}</span>
+                    <span>{categoryConfig.label}</span>
+                  </span>
+
+                  {/* Badge de fecha */}
+                  {dueDate && (
+                    <span
+                      className={`${sizeConfig.badgeSize} rounded-full font-medium flex items-center gap-1 relative z-10`}
+                      style={{
+                        backgroundColor: badgeBgColor,
+                        color: classes.text.primary,
+                      }}
+                    >
+                      <span>📅</span>
+                      <span>
+                        {new Date(dueDate + 'T00:00:00').toLocaleDateString('es-ES', {
+                          day: '2-digit',
+                          month: 'short',
+                        })}
+                      </span>
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Indicador de completado */}
+            {completed && (
+              <div className="flex-shrink-0 flex items-center relative z-10">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center"
+                >
+                  <svg
+                    className="w-4 h-4 text-white"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={3}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </motion.div>
               </div>
             )}
           </div>
-
-          {/* Indicador de completado */}
-          {completed && (
-            <div className="flex-shrink-0 flex items-center">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center"
-              >
-                <svg
-                  className="w-4 h-4 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={3}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              </motion.div>
-            </div>
-          )}
         </div>
       </motion.div>
 

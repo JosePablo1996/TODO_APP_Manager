@@ -92,12 +92,15 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   const opacityConfig = getOpacityConfig(taskOpacity);
   const borderRadiusConfig = getBorderRadiusConfig(taskBorderRadius);
 
-  const bgOpacity = parseFloat(opacityConfig.bgOpacity);
-  const borderOpacity = parseFloat(opacityConfig.borderOpacity);
+  // 🎨 CORREGIDO: Aumentar opacidad para que el color sea más visible
+  // Multiplicamos por 3 para que sea más notorio el tinte
+  const bgOpacity = parseFloat(opacityConfig.bgOpacity) * 3;
+  const borderOpacity = parseFloat(opacityConfig.borderOpacity) * 3;
 
   // Colores calculados
-  const backgroundColor = hexToRgba(taskColor, bgOpacity);
-  const borderColorRgba = hexToRgba(taskColor, borderOpacity);
+  const backgroundColor = hexToRgba(taskColor, Math.min(bgOpacity, 0.4)); // Máximo 40% de opacidad
+  const borderColorRgba = hexToRgba(taskColor, Math.min(borderOpacity, 0.6)); // Máximo 60% de opacidad
+  const iconBgColor = hexToRgba(taskColor, Math.min(bgOpacity * 1.5, 0.5));
 
   // Estados para swipe
   const x = useMotionValue(0);
@@ -271,164 +274,172 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           </div>
         </motion.div>
 
-        {/* 🎨 Tarjeta deslizable con personalización */}
+        {/* 🎨 Tarjeta deslizable CON FONDO DE COLOR VISIBLE */}
         <motion.div
           drag={isSelectionMode ? false : 'x'}
           dragConstraints={{ left: 0, right: 0 }}
           dragElastic={0.1}
-          style={{ 
-            x,
-            backgroundColor,
-            borderBottom: `1px solid ${borderColorRgba}`,
-          }}
+          style={{ x }}
           onDragEnd={handleDragEnd}
           onClick={handleCardClick}
           className={`
-            p-4 transition-all duration-200 
-            ${classes.bg.hover} 
-            last:border-b-0 cursor-pointer relative z-10
+            relative z-10 cursor-pointer
+            transition-all duration-200 
+            last:border-b-0
             ${borderRadiusConfig.class}
           `}
           whileTap={{ cursor: 'grabbing' }}
         >
-          {/* Barra de color lateral */}
+          {/* 🎨 CAPA DE FONDO CON COLOR (siempre visible) */}
+          <div 
+            className={`absolute inset-0 ${borderRadiusConfig.class}`}
+            style={{ 
+              backgroundColor: backgroundColor,
+              borderBottom: `1px solid ${borderColorRgba}`,
+            }}
+          />
+          
+          {/* 🎨 BARRA LATERAL DE COLOR (viñeta) */}
           <div
-            className="absolute left-0 top-0 bottom-0 w-1.5"
+            className={`absolute left-0 top-0 bottom-0 w-2 ${borderRadiusConfig.class === 'rounded-none' ? '' : 'rounded-l-lg'}`}
             style={{ backgroundColor: taskColor }}
           />
 
-          <div className={`flex items-start ${sizeConfig.gap}`}>
-            {/* Checkbox de selección o completado */}
-            {isSelectionMode ? (
-              <motion.button
-                whileTap={{ scale: 0.9 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleSelect?.(task.id);
-                }}
-                className="mt-0.5 flex-shrink-0"
-                aria-label={isSelected ? "Deseleccionar" : "Seleccionar"}
-              >
-                {isSelected ? (
-                  <CheckSquare size={20} className="text-emerald-500" />
-                ) : (
-                  <Square size={20} className={`${classes.icon.secondary} hover:text-emerald-500 transition-colors`} />
-                )}
-              </motion.button>
-            ) : (
-              <motion.button
-                whileTap={{ scale: 0.9 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleComplete(task.id);
-                }}
-                className="mt-0.5 flex-shrink-0"
-                aria-label={task.completed ? "Marcar como pendiente" : "Marcar como completada"}
-              >
-                {task.completed ? (
-                  <Check size={20} className="text-emerald-500" />
-                ) : (
-                  <Circle size={20} className={`${classes.icon.secondary} hover:text-emerald-500 transition-colors`} />
-                )}
-              </motion.button>
-            )}
+          {/* CONTENIDO DE LA TARJETA (sobre el fondo de color) */}
+          <div className={`relative p-4 ${sizeConfig.cardPadding}`}>
+            <div className={`flex items-start ${sizeConfig.gap}`}>
+              {/* Checkbox de selección o completado */}
+              {isSelectionMode ? (
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleSelect?.(task.id);
+                  }}
+                  className="mt-0.5 flex-shrink-0 relative z-10"
+                  aria-label={isSelected ? "Deseleccionar" : "Seleccionar"}
+                >
+                  {isSelected ? (
+                    <CheckSquare size={20} className="text-emerald-500" />
+                  ) : (
+                    <Square size={20} className={`${classes.icon.secondary} hover:text-emerald-500 transition-colors`} />
+                  )}
+                </motion.button>
+              ) : (
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleComplete(task.id);
+                  }}
+                  className="mt-0.5 flex-shrink-0 relative z-10"
+                  aria-label={task.completed ? "Marcar como pendiente" : "Marcar como completada"}
+                >
+                  {task.completed ? (
+                    <Check size={20} className="text-emerald-500" />
+                  ) : (
+                    <Circle size={20} className={`${classes.icon.secondary} hover:text-emerald-500 transition-colors`} />
+                  )}
+                </motion.button>
+              )}
 
-            {/* 🎨 Icono personalizado de la tarea */}
-            {hasCustomization && (
-              <div
-                className="flex-shrink-0 p-2 rounded-lg"
-                style={{ backgroundColor: hexToRgba(taskColor, bgOpacity * 2) }}
-              >
-                <IconMapper
-                  name={iconConfig.icon}
-                  size={sizeConfig.iconSize}
-                  className=""
-                />
-              </div>
-            )}
-            
-            {/* Contenido principal */}
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-2 mb-2">
-                <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${priorityStyles.bg} ${priorityStyles.text} border ${priorityStyles.border}`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${priorityStyles.dot}`} />
-                  {task.priority}
+              {/* 🎨 Icono personalizado de la tarea */}
+              {hasCustomization && (
+                <div
+                  className="flex-shrink-0 p-2 rounded-lg relative z-10"
+                  style={{ backgroundColor: iconBgColor }}
+                >
+                  <IconMapper
+                    name={iconConfig.icon}
+                    size={sizeConfig.iconSize}
+                    className=""
+                  />
                 </div>
-                
-                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${getCategoryStyle(task.category)}`}>
-                  {getCategoryIcon(task.category)}{task.category}
-                </span>
-                
-                {task.isFavorite && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-amber-500/10 text-amber-500">
-                    <Star size={10} fill="currentColor" />Favorita
-                  </span>
-                )}
-                
-                {task.isArchived && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-gray-500/10 text-gray-500">
-                    <Archive size={10} />Archivada
-                  </span>
-                )}
-                
-                {task.dueDate && !task.completed && (
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                    isOverdue() 
-                      ? 'bg-red-500/10 text-red-500 border border-red-500/30' 
-                      : isDueSoon() 
-                      ? 'bg-amber-500/10 text-amber-500 border border-amber-500/30'
-                      : `${classes.bg.secondary} ${classes.text.muted}`
-                  }`}>
-                    <Calendar size={10} />
-                    {new Date(task.dueDate).toLocaleDateString()}
-                    {isOverdue() && ' · Vencida'}
-                    {isDueSoon() && !isOverdue() && ' · Pronto vence'}
-                  </span>
-                )}
-              </div>
-              
-              {/* 🎨 Título con tamaño personalizado */}
-              <h4 className={`${sizeConfig.titleSize} font-medium ${task.completed ? 'line-through ' + classes.text.muted : classes.text.primary}`}>
-                {task.title}
-              </h4>
-              
-              {/* 🎨 Descripción (visible según tamaño) */}
-              {task.description && taskSize !== 'sm' && (
-                <p className={`text-xs mt-1 line-clamp-2 ${task.completed ? classes.text.muted : classes.text.secondary}`}>
-                  {task.description}
-                </p>
               )}
               
-              <div className="flex items-center gap-1.5 mt-2">
-                <Calendar size={12} className={classes.icon.secondary} />
-                <span className={`text-xs ${classes.text.muted}`}>
-                  {new Date(task.createdAt).toLocaleDateString()}
-                </span>
+              {/* Contenido principal */}
+              <div className="flex-1 min-w-0 relative z-10">
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                  <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${priorityStyles.bg} ${priorityStyles.text} border ${priorityStyles.border}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${priorityStyles.dot}`} />
+                    {task.priority}
+                  </div>
+                  
+                  <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${getCategoryStyle(task.category)}`}>
+                    {getCategoryIcon(task.category)}{task.category}
+                  </span>
+                  
+                  {task.isFavorite && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-amber-500/10 text-amber-500">
+                      <Star size={10} fill="currentColor" />Favorita
+                    </span>
+                  )}
+                  
+                  {task.isArchived && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-gray-500/10 text-gray-500">
+                      <Archive size={10} />Archivada
+                    </span>
+                  )}
+                  
+                  {task.dueDate && !task.completed && (
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                      isOverdue() 
+                        ? 'bg-red-500/10 text-red-500 border border-red-500/30' 
+                        : isDueSoon() 
+                        ? 'bg-amber-500/10 text-amber-500 border border-amber-500/30'
+                        : `${classes.bg.secondary} ${classes.text.muted}`
+                    }`}>
+                      <Calendar size={10} />
+                      {new Date(task.dueDate).toLocaleDateString()}
+                      {isOverdue() && ' · Vencida'}
+                      {isDueSoon() && !isOverdue() && ' · Pronto vence'}
+                    </span>
+                  )}
+                </div>
+                
+                {/* 🎨 Título con tamaño personalizado */}
+                <h4 className={`${sizeConfig.titleSize} font-medium ${task.completed ? 'line-through ' + classes.text.muted : classes.text.primary}`}>
+                  {task.title}
+                </h4>
+                
+                {/* 🎨 Descripción (visible según tamaño) */}
+                {task.description && taskSize !== 'sm' && (
+                  <p className={`text-xs mt-1 line-clamp-2 ${task.completed ? classes.text.muted : classes.text.secondary}`}>
+                    {task.description}
+                  </p>
+                )}
+                
+                <div className="flex items-center gap-1.5 mt-2">
+                  <Calendar size={12} className={classes.icon.secondary} />
+                  <span className={`text-xs ${classes.text.muted}`}>
+                    {new Date(task.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
               </div>
-            </div>
 
-            {/* Menú de tres puntos (solo en modo normal) */}
-            {!isSelectionMode && (
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowMenu(true);
-                }}
-                className="p-2 rounded-xl transition-all duration-300 flex-shrink-0"
-                style={{
-                  backgroundColor: priorityStyles.bg,
-                  color: priorityStyles.text,
-                  border: `1px solid ${priorityStyles.border}`,
-                }}
-                aria-label="Abrir menú de opciones"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                </svg>
-              </motion.button>
-            )}
+              {/* Menú de tres puntos (solo en modo normal) */}
+              {!isSelectionMode && (
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowMenu(true);
+                  }}
+                  className="p-2 rounded-xl transition-all duration-300 flex-shrink-0 relative z-10"
+                  style={{
+                    backgroundColor: priorityStyles.bg,
+                    color: priorityStyles.text,
+                    border: `1px solid ${priorityStyles.border}`,
+                  }}
+                  aria-label="Abrir menú de opciones"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                  </svg>
+                </motion.button>
+              )}
+            </div>
           </div>
         </motion.div>
       </motion.div>

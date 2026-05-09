@@ -92,12 +92,15 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   const opacityConfig = getOpacityConfig(taskOpacity);
   const borderRadiusConfig = getBorderRadiusConfig(taskBorderRadius);
 
-  const bgOpacity = parseFloat(opacityConfig.bgOpacity);
-  const borderOpacity = parseFloat(opacityConfig.borderOpacity);
+  // 🎨 CORREGIDO: Aumentar opacidad para que el color sea más visible
+  // Multiplicamos por 3 para que sea más notorio el tinte
+  const bgOpacity = parseFloat(opacityConfig.bgOpacity) * 3;
+  const borderOpacity = parseFloat(opacityConfig.borderOpacity) * 3;
 
   // Colores calculados
-  const backgroundColor = hexToRgba(taskColor, bgOpacity);
-  const borderColorRgba = hexToRgba(taskColor, borderOpacity);
+  const backgroundColor = hexToRgba(taskColor, Math.min(bgOpacity, 0.4)); // Máximo 40% de opacidad
+  const borderColorRgba = hexToRgba(taskColor, Math.min(borderOpacity, 0.6)); // Máximo 60% de opacidad
+  const iconBgColor = hexToRgba(taskColor, Math.min(bgOpacity * 1.5, 0.5));
 
   // Estados para swipe
   const x = useMotionValue(0);
@@ -270,169 +273,171 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           </div>
         </motion.div>
 
-        {/* 🎨 Tarjeta deslizable con personalización */}
+        {/* 🎨 Tarjeta deslizable CON FONDO DE COLOR VISIBLE */}
         <motion.div
           drag={isSelectionMode ? false : 'x'}
           dragConstraints={{ left: 0, right: 0 }}
           dragElastic={0.1}
           whileHover={isSelectionMode ? {} : { y: -4, scale: 1.02 }}
-          style={{ 
-            x,
-            backgroundColor,
-            borderColor: borderColorRgba,
-            borderTopWidth: '3px',
-            borderTopStyle: 'solid',
-            borderTopColor: taskColor,
-          }}
+          style={{ x }}
           onDragEnd={handleDragEnd}
           onClick={handleCardClick}
           className={`
-            ${sizeConfig.cardPadding} 
-            border 
-            ${classes.bg.card} 
-            shadow-sm hover:shadow-lg 
+            relative z-10 cursor-pointer
             transition-all duration-200 
-            cursor-pointer relative z-10
+            shadow-sm hover:shadow-lg
             ${borderRadiusConfig.class}
           `}
         >
-          {/* Barra de color superior decorativa */}
+          {/* 🎨 CAPA DE FONDO CON COLOR (siempre visible) */}
+          <div 
+            className={`absolute inset-0 ${borderRadiusConfig.class}`}
+            style={{ 
+              backgroundColor: backgroundColor,
+              border: `1px solid ${borderColorRgba}`,
+            }}
+          />
+          
+          {/* 🎨 BARRA SUPERIOR DE COLOR (viñeta) */}
           <div
-            className={`absolute top-0 left-0 right-0 h-1 ${borderRadiusConfig.class === 'rounded-none' ? '' : 'rounded-t-lg'}`}
-            style={{ backgroundColor: taskColor, opacity: 0.3 }}
+            className={`absolute top-0 left-0 right-0 h-1.5 ${borderRadiusConfig.class === 'rounded-none' ? '' : 'rounded-t-lg'}`}
+            style={{ backgroundColor: taskColor, opacity: 0.6 }}
           />
 
-          {/* Header con checkbox, icono y prioridad */}
-          <div className="flex items-start justify-between mb-3">
-            <div className="flex items-center gap-2">
-              {/* Checkbox de selección o completado */}
-              {isSelectionMode ? (
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onToggleSelect?.(task.id);
-                  }}
-                  className="flex-shrink-0"
-                  aria-label={isSelected ? "Deseleccionar" : "Seleccionar"}
-                >
-                  {isSelected ? (
-                    <CheckSquare size={18} className="text-emerald-500" />
-                  ) : (
-                    <Square size={18} className={`${classes.icon.secondary} hover:text-emerald-500 transition-colors`} />
-                  )}
-                </motion.button>
-              ) : (
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onToggleComplete(task.id);
-                  }}
-                  className="flex-shrink-0"
-                  aria-label={task.completed ? "Marcar como pendiente" : "Marcar como completada"}
-                >
-                  {task.completed ? (
-                    <Check size={18} className="text-emerald-500" />
-                  ) : (
-                    <Circle size={18} className={classes.icon.secondary} />
-                  )}
-                </motion.button>
-              )}
+          {/* CONTENIDO DE LA TARJETA (sobre el fondo de color) */}
+          <div className={`relative ${sizeConfig.cardPadding}`}>
+            {/* Header con checkbox, icono y prioridad */}
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex items-center gap-2">
+                {/* Checkbox de selección o completado */}
+                {isSelectionMode ? (
+                  <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleSelect?.(task.id);
+                    }}
+                    className="flex-shrink-0 relative z-10"
+                    aria-label={isSelected ? "Deseleccionar" : "Seleccionar"}
+                  >
+                    {isSelected ? (
+                      <CheckSquare size={18} className="text-emerald-500" />
+                    ) : (
+                      <Square size={18} className={`${classes.icon.secondary} hover:text-emerald-500 transition-colors`} />
+                    )}
+                  </motion.button>
+                ) : (
+                  <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleComplete(task.id);
+                    }}
+                    className="flex-shrink-0 relative z-10"
+                    aria-label={task.completed ? "Marcar como pendiente" : "Marcar como completada"}
+                  >
+                    {task.completed ? (
+                      <Check size={18} className="text-emerald-500" />
+                    ) : (
+                      <Circle size={18} className={classes.icon.secondary} />
+                    )}
+                  </motion.button>
+                )}
 
-              {/* 🎨 Icono personalizado de la tarea */}
-              {hasCustomization && (
-                <div
-                  className="flex-shrink-0 p-1.5 rounded-lg"
-                  style={{ backgroundColor: hexToRgba(taskColor, bgOpacity * 2) }}
-                >
-                  <IconMapper
-                    name={iconConfig.icon}
-                    size={sizeConfig.iconSize - 2}
-                    className=""
-                  />
+                {/* 🎨 Icono personalizado de la tarea */}
+                {hasCustomization && (
+                  <div
+                    className="flex-shrink-0 p-1.5 rounded-lg relative z-10"
+                    style={{ backgroundColor: iconBgColor }}
+                  >
+                    <IconMapper
+                      name={iconConfig.icon}
+                      size={sizeConfig.iconSize - 2}
+                      className=""
+                    />
+                  </div>
+                )}
+                
+                {/* Badge de prioridad */}
+                <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium relative z-10 ${priorityStyles.bg} ${priorityStyles.text} border ${priorityStyles.border}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${priorityStyles.dot}`} />
+                  {task.priority}
                 </div>
-              )}
-              
-              {/* Badge de prioridad */}
-              <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${priorityStyles.bg} ${priorityStyles.text} border ${priorityStyles.border}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${priorityStyles.dot}`} />
-                {task.priority}
+                
+                {/* Indicador de favorito */}
+                {task.isFavorite && (
+                  <Star size={12} className="text-amber-500 fill-amber-500 relative z-10" />
+                )}
               </div>
               
-              {/* Indicador de favorito */}
-              {task.isFavorite && (
-                <Star size={12} className="text-amber-500 fill-amber-500" />
+              {/* Menú de tres puntos (solo en modo normal) */}
+              {!isSelectionMode && (
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowMenu(true);
+                  }}
+                  className="p-1.5 rounded-lg transition-all duration-300 flex-shrink-0 relative z-10"
+                  style={{
+                    backgroundColor: priorityStyles.bg,
+                    color: priorityStyles.text,
+                    border: `1px solid ${priorityStyles.border}`,
+                  }}
+                  aria-label="Abrir menú de opciones"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                  </svg>
+                </motion.button>
               )}
             </div>
-            
-            {/* Menú de tres puntos (solo en modo normal) */}
-            {!isSelectionMode && (
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowMenu(true);
-                }}
-                className="p-1.5 rounded-lg transition-all duration-300 flex-shrink-0"
-                style={{
-                  backgroundColor: priorityStyles.bg,
-                  color: priorityStyles.text,
-                  border: `1px solid ${priorityStyles.border}`,
-                }}
-                aria-label="Abrir menú de opciones"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                </svg>
-              </motion.button>
-            )}
-          </div>
 
-          {/* 🎨 Título con tamaño personalizado */}
-          <h4 className={`${sizeConfig.titleSize} font-medium mb-1 ${task.completed ? 'line-through ' + classes.text.muted : classes.text.primary}`}>
-            {task.title}
-          </h4>
-          
-          {/* 🎨 Descripción (visible según tamaño) */}
-          {task.description && taskSize !== 'sm' && (
-            <p className={`text-xs mb-2 line-clamp-2 ${classes.text.muted}`}>
-              {task.description}
-            </p>
-          )}
+            {/* 🎨 Título con tamaño personalizado */}
+            <h4 className={`${sizeConfig.titleSize} font-medium mb-1 relative z-10 ${task.completed ? 'line-through ' + classes.text.muted : classes.text.primary}`}>
+              {task.title}
+            </h4>
+            
+            {/* 🎨 Descripción (visible según tamaño) */}
+            {task.description && taskSize !== 'sm' && (
+              <p className={`text-xs mb-2 line-clamp-2 relative z-10 ${classes.text.muted}`}>
+                {task.description}
+              </p>
+            )}
 
-          {/* Badges y fecha */}
-          <div className={`flex flex-wrap ${sizeConfig.gap} mt-3 pt-2 border-t border-dashed`} style={{ borderColor: borderColorRgba }}>
-            {/* Categoría */}
-            <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded ${getCategoryStyle(task.category)}`}>
-              {getCategoryIcon(task.category)}
-              {task.category}
-            </span>
-            
-            {/* Fecha límite */}
-            {task.dueDate && !task.completed && (
-              <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded ${
-                isOverdue() 
-                  ? 'bg-red-500/10 text-red-500 border border-red-500/30' 
-                  : isDueSoon() 
-                  ? 'bg-amber-500/10 text-amber-500 border border-amber-500/30'
-                  : `${classes.bg.secondary} ${classes.text.muted}`
-              }`}>
-                <Calendar size={10} />
-                {new Date(task.dueDate).toLocaleDateString()}
-                {isOverdue() && ' · Vencida'}
-                {isDueSoon() && !isOverdue() && ' · Pronto vence'}
+            {/* Badges y fecha */}
+            <div className={`flex flex-wrap ${sizeConfig.gap} mt-3 pt-2 border-t border-dashed relative z-10`} style={{ borderColor: borderColorRgba }}>
+              {/* Categoría */}
+              <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded ${getCategoryStyle(task.category)}`}>
+                {getCategoryIcon(task.category)}
+                {task.category}
               </span>
-            )}
-            
-            {/* Badge de archivada */}
-            {task.isArchived && (
-              <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-500/10 text-gray-500 border border-gray-500/30">
-                <Archive size={10} />
-                Archivada
-              </span>
-            )}
+              
+              {/* Fecha límite */}
+              {task.dueDate && !task.completed && (
+                <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded ${
+                  isOverdue() 
+                    ? 'bg-red-500/10 text-red-500 border border-red-500/30' 
+                    : isDueSoon() 
+                    ? 'bg-amber-500/10 text-amber-500 border border-amber-500/30'
+                    : `${classes.bg.secondary} ${classes.text.muted}`
+                }`}>
+                  <Calendar size={10} />
+                  {new Date(task.dueDate).toLocaleDateString()}
+                  {isOverdue() && ' · Vencida'}
+                  {isDueSoon() && !isOverdue() && ' · Pronto vence'}
+                </span>
+              )}
+              
+              {/* Badge de archivada */}
+              {task.isArchived && (
+                <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded bg-gray-500/10 text-gray-500 border border-gray-500/30">
+                  <Archive size={10} />
+                  Archivada
+                </span>
+              )}
+            </div>
           </div>
         </motion.div>
       </motion.div>
