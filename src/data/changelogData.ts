@@ -2,14 +2,191 @@ import { Version } from '../types/changelog.types';
 
 export const changelogVersions: Version[] = [
   // ============================================
-  // VERSIÓN 2.6.0 - ACTUAL
+  // VERSIÓN 2.7.0 - ACTUAL
+  // ============================================
+  {
+    version: '2.7.0',
+    date: '08 Mayo 2026',
+    title: '🎨 Personalización de Tareas + Correcciones Grid/List + Mejoras UI',
+    gradient: 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500',
+    isLatest: true,
+    changes: [
+      {
+        category: '🎨 Personalización de Tareas',
+        icon: 'Palette',
+        color: 'text-purple-500',
+        items: [
+          {
+            description: '🖼️ Selector de Iconos (12 opciones)',
+            details: [
+              'Nuevo componente TaskIconSelector con grid visual de iconos',
+              'Iconos disponibles: CheckCircle, Users, Star, Lightbulb, ShoppingCart, Phone, Mail, FileText, Plane, Heart, BookOpen, Code',
+              'Indicador de selección animado con check',
+              'Preview del icono seleccionado en tiempo real',
+              'Integrado en CreateTaskPage y EditTaskPage',
+            ],
+          },
+          {
+            description: '📐 Selector de Tamaño de Tarjeta (3 opciones)',
+            details: [
+              'Nuevo componente TaskSizeSelector con preview de barras',
+              'Compacto (60px): ideal para listas densas',
+              'Normal (80px): equilibrio entre información y espacio',
+              'Expandido (100px): máxima información visible',
+              'Tamaño afecta altura, padding, icono y badges',
+            ],
+          },
+          {
+            description: '💧 Selector de Opacidad de Color (3 niveles)',
+            details: [
+              'Nuevo componente TaskOpacitySelector con círculos concéntricos',
+              'Sutil (5% fondo / 15% borde): color apenas visible',
+              'Medio (10% fondo / 25% borde): color moderado',
+              'Intenso (20% fondo / 40% borde): color bien marcado',
+              'Preview con porcentajes de fondo y borde',
+            ],
+          },
+          {
+            description: '🔲 Selector de Borde Redondeado (4 estilos)',
+            details: [
+              'Cuadrado: esquinas rectas (rounded-none)',
+              'Redondeado: esquinas suaves (rounded-xl)',
+              'Circular: esquinas muy redondeadas (rounded-2xl)',
+              'Píldora: completamente redondeado (rounded-3xl)',
+              'Preview visual de cada estilo con miniatura',
+            ],
+          },
+          {
+            description: '📋 Vista Previa Unificada (TaskPreview)',
+            details: [
+              'Nuevo componente que muestra cómo se verá la tarea con todas las personalizaciones',
+              'Muestra icono, tamaño, opacidad, borde, color, badges y fecha',
+              'Resumen de personalización aplicada en la parte inferior',
+              'Actualización en tiempo real al cambiar cualquier selector',
+            ],
+          },
+        ],
+      },
+      {
+        category: '🎨 Tinte de Color en Tareas',
+        icon: 'Droplet',
+        color: 'text-cyan-500',
+        items: [
+          {
+            description: '🖌️ Fondo teñido del color seleccionado',
+            details: [
+              'TaskItem: capa de fondo independiente con opacidad controlada',
+              'TaskCard: capa de fondo con borde del color seleccionado',
+              'Barra lateral (lista) y barra superior (grid) con color sólido',
+              'Opacidad aumentada x3 para mejor visibilidad del tinte',
+              'Límites: 40% fondo, 60% bordes para mantener legibilidad',
+              'Contenido con z-10 para permanecer legible sobre el tinte',
+            ],
+          },
+          {
+            description: '🎯 Icono personalizado en tarjetas',
+            details: [
+              'El icono seleccionado se muestra en TaskItem y TaskCard',
+              'Fondo del icono con opacidad incrementada para contraste',
+              'Tamaño del icono se adapta según el tamaño de tarjeta elegido',
+            ],
+          },
+        ],
+      },
+      {
+        category: '📱 Corrección Grid/List en Móvil',
+        icon: 'LayoutGrid',
+        color: 'text-emerald-500',
+        items: [
+          {
+            description: '🔲 Grid ahora visible en dispositivos móviles',
+            details: [
+              'Cambio de grid-cols-1 a grid-cols-2 en móviles para vista grid',
+              'En desktop: 3 columnas (lg:grid-cols-3)',
+              'La vista lista mantiene 1 columna en todos los dispositivos',
+              'Ahora se diferencia claramente List vs Grid en móvil',
+            ],
+          },
+        ],
+      },
+      {
+        category: '📁 Nuevos Archivos y Datos',
+        icon: 'FileJson',
+        color: 'text-amber-500',
+        items: [
+          {
+            description: '✨ Archivos creados (5)',
+            details: [
+              'src/data/taskCustomization.ts - Datos de personalización (180 líneas)',
+              'src/components/tasks/TaskIconSelector.tsx - Selector de iconos (140 líneas)',
+              'src/components/tasks/TaskSizeSelector.tsx - Selector de tamaños (160 líneas)',
+              'src/components/tasks/TaskOpacitySelector.tsx - Selector de opacidad (180 líneas)',
+              'src/components/tasks/TaskPreview.tsx - Vista previa unificada (210 líneas)',
+            ],
+          },
+          {
+            description: '📝 Archivos modificados (8)',
+            details: [
+              'src/types/task.ts - Nuevos campos: icon, size, opacity, borderRadius',
+              'src/pages/CreateTaskPage.tsx - Integración de selectores de personalización',
+              'src/pages/EditTaskPage.tsx - Carga y edición de personalización existente',
+              'src/components/tasks/TaskItem.tsx - Tinte de color + icono personalizado',
+              'src/components/tasks/TaskCard.tsx - Tinte de color + icono personalizado',
+              'src/pages/ProtectedPage.tsx - Corrección grid móvil (grid-cols-2)',
+              'src/components/changelog/IconMapper.tsx - 13 nuevos iconos Lucide',
+              'src/pages/HelpPage.tsx - Actualizado a v2.7.0',
+            ],
+          },
+        ],
+      },
+      {
+        category: '🐛 Correcciones de Errores',
+        icon: 'Bug',
+        color: 'text-red-500',
+        items: [
+          {
+            description: '✅ Errores resueltos en esta versión',
+            details: [
+              '#1: Tinte de color no visible en tareas → Capa de fondo independiente con opacidad x3',
+              '#2: Grid invisible en móvil → grid-cols-2 en lugar de grid-cols-1',
+              '#3: DevicePhone no existe en lucide-react → Reemplazado por MonitorSmartphone',
+              '#4: process.env no disponible en Vite → Cambiado a import.meta.env.DEV',
+              '#5: Estilos duplicados en TaskItem/TaskCard → Unificado en un solo bloque style',
+              '#6: Espaciado inconsistente en CreateTaskPage → Layout responsive mejorado',
+              '#7: IconMapper sin iconos nuevos → Agregados 13 iconos (Droplets, Rows, etc.)',
+            ],
+          },
+        ],
+      },
+      {
+        category: '🔧 Mejoras Técnicas',
+        icon: 'Code',
+        color: 'text-blue-500',
+        items: [
+          {
+            description: '⚡ Optimizaciones y refactorización',
+            details: [
+              'Función hexToRgba() reutilizable en TaskItem, TaskCard y TaskPreview',
+              'Configuración centralizada en taskCustomization.ts con tipos TypeScript',
+              'Funciones helper: getIconConfig(), getSizeConfig(), getOpacityConfig(), getBorderRadiusConfig()',
+              'Valores por defecto: DEFAULT_TASK_CUSTOMIZATION para nuevas tareas',
+              'Límites de opacidad: Math.min() para no exceder legibilidad',
+              'Compatibilidad con modo oscuro en todos los selectores',
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  // ============================================
+  // VERSIÓN 2.6.0
   // ============================================
   {
     version: '2.6.0',
     date: '07 Mayo 2026',
     title: '🔄 Sincronización Backend + Backup/Restore + Soft Delete + Swipe Actions',
     gradient: 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500',
-    isLatest: true,
+    isLatest: false,
     changes: [
       {
         category: '🔄 Sincronización Completa con Backend',
@@ -648,7 +825,7 @@ export const changelogVersions: Version[] = [
       },
       {
         category: '💬 Diálogo de confirmación en ResetPasswordPage',
-        icon: 'DevicePhone',
+        icon: 'MonitorSmartphone',
         color: 'text-purple-500',
         items: [
           {

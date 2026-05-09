@@ -21,8 +21,8 @@ import { changelogVersions } from '../data/changelogData';
  * - Footer con contador y créditos
  * 
  * Estado:
- * - expandedVersions: Set con las versiones actualmente expandidas
- * - Por defecto, la versión más reciente (v2.6.0) está expandida
+ * - expandedVersion: Versión actualmente expandida
+ * - Por defecto, la versión más reciente (v2.7.0) está expandida
  * 
  * Comportamiento:
  * - Solo una versión puede estar expandida a la vez
@@ -37,11 +37,11 @@ const ChangelogPage: React.FC = () => {
   const classes = useThemeClasses();
 
   /** 
-   * Set de versiones expandidas.
+   * Versión actualmente expandida.
    * Solo una versión puede estar expandida a la vez.
-   * Por defecto: v2.6.0 (la más reciente)
+   * Por defecto: v2.7.0 (la más reciente)
    */
-  const [expandedVersion, setExpandedVersion] = useState<string | null>('2.6.0');
+  const [expandedVersion, setExpandedVersion] = useState<string | null>('2.7.0');
 
   // ============================================
   // MANEJADORES
@@ -82,7 +82,7 @@ const ChangelogPage: React.FC = () => {
         {/* Footer con contador y créditos */}
         <ChangelogFooter
           versionCount={changelogVersions.length}
-          lastUpdate="07 Mayo 2026"
+          lastUpdate="08 Mayo 2026"
           classes={classes}
         />
       </div>
