@@ -172,7 +172,7 @@ export interface BackupData {
 }
 
 // ============================================
-// TIPOS PARA COMPONENTES
+// TIPOS PARA COMPONENTES (ACTUALIZADOS)
 // ============================================
 
 /**
@@ -188,7 +188,7 @@ export interface BackupStatsProps {
 }
 
 /**
- * Props para lista de backups locales
+ * Props para lista de backups locales - ✅ ACTUALIZADO
  */
 export interface BackupLocalListProps {
   backups: LocalBackup[];
@@ -197,7 +197,9 @@ export interface BackupLocalListProps {
   onSelectAll: () => void;
   onUploadSelected: () => void;
   onUploadAll: () => void;
+  onDeleteLocal?: (backup: LocalBackup) => void;  // ✅ NUEVO: Eliminar backup local individual
   isUploading: boolean;
+  isDeleting?: string | null;  // ✅ NUEVO: ID del backup que se está eliminando
 }
 
 /**
@@ -224,4 +226,23 @@ export interface BackupBannerProps {
 export interface BackupTabsProps {
   activeTab: 'general' | 'locals' | 'cloud';
   onTabChange: (tab: 'general' | 'locals' | 'cloud') => void;
+}
+
+/**
+ * Props para el componente de sincronización manual
+ */
+export interface BackupSyncManualProps {
+  onSync: () => void;
+  isSyncing: boolean;
+  pendingCount: number;
+  lastSync?: string;
+}
+
+/**
+ * Props para el componente de backup selectivo
+ */
+export interface BackupSelectiveProps {
+  backups: CloudBackupMetadata[];
+  onUploadSelected: (ids: string[]) => void;
+  isUploading: boolean;
 }

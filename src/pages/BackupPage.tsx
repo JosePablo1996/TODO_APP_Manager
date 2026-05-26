@@ -24,7 +24,13 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { TaskResponse } from '../services/taskService';
-import type { CloudBackupMetadata, BackupData, LocalBackup, BackupHistoryEntry } from '../types/backup';
+import type { 
+  CloudBackupMetadata, 
+  BackupData, 
+  LocalBackup, 
+  BackupHistoryEntry,
+  CloudBackupCreateData 
+} from '../types/backup';
 
 // ============================================
 // COMPONENTES AUXILIARES
@@ -68,6 +74,8 @@ const BackupPage: React.FC = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDeletingLocal, setIsDeletingLocal] = useState<string | null>(null);
   const [cloudBackups, setCloudBackups] = useState<CloudBackupMetadata[]>([]);
   const [localBackups, setLocalBackups] = useState<LocalBackup[]>([]);
   const [selectedLocalIds, setSelectedLocalIds] = useState<Set<string>>(new Set());
@@ -75,6 +83,9 @@ const BackupPage: React.FC = () => {
   const [isRestoring, setIsRestoring] = useState<string | null>(null);
   const [cloudStats, setCloudStats] = useState({ total_backups: 0, total_size_mb: 0, remaining_slots: 20 });
   const [lastSyncDate, setLastSyncDate] = useState<string | null>(null);
+
+  // Almacenamiento de contenido de backups para subir
+  const [backupContents, setBackupContents] = useState<Map<string, BackupData>>(new Map());
 
   // Modales
   const [showProgressModal, setShowProgressModal] = useState(false);
@@ -89,13 +100,9 @@ const BackupPage: React.FC = () => {
   const [modalImportedCount, setModalImportedCount] = useState(0);
   const [modalTotalCount, setModalTotalCount] = useState(0);
 
-  // Cargar datos iniciales
-  useEffect(() => {
-    loadTaskCount();
-    loadCloudBackups();
-    loadLocalBackups();
-    loadCloudStats();
-  }, []);
+  // ============================================
+  // FUNCIONES DE CARGA DE DATOS
+  // ============================================
 
   const loadTaskCount = async () => {
     try {
@@ -119,6 +126,44 @@ const BackupPage: React.FC = () => {
 
   const loadLocalBackups = () => {
     const history = backupService.getLocalBackups();
+    
+    // Cargar contenidos de backups desde localStorage
+    const contents = new Map<string, BackupData>();
+    
+    for (const entry of history) {
+      let stored = localStorage.getItem(`todoapp_backup_${entry.fileName}`);
+      
+      // Si no se encuentra con el nombre exacto, buscar por timestamp
+      if (!stored) {
+        const timestampMatch = entry.fileName.match(/\d+/);
+        if (timestampMatch) {
+          const timestamp = timestampMatch[0];
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.includes(timestamp) && key.includes('todoapp_backup')) {
+              stored = localStorage.getItem(key);
+              console.log(`✅ Backup encontrado con clave alternativa: ${key}`);
+              break;
+            }
+          }
+        }
+      }
+      
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored) as BackupData;
+          contents.set(entry.fileName, parsed);
+          console.log(`✅ Contenido cargado para: ${entry.fileName}`);
+        } catch (e) {
+          console.error(`Error parseando backup ${entry.fileName}:`, e);
+        }
+      } else {
+        console.warn(`⚠️ No se encontró contenido para: ${entry.fileName}`);
+      }
+    }
+    
+    setBackupContents(contents);
+    
     const localBackupList: LocalBackup[] = history.map((entry: BackupHistoryEntry) => ({
       id: `local-${entry.timestamp}`,
       file_name: entry.fileName,
@@ -130,6 +175,7 @@ const BackupPage: React.FC = () => {
       fileName: entry.fileName,
       timestamp: entry.timestamp,
     }));
+    
     setLocalBackups(localBackupList);
   };
 
@@ -146,7 +192,129 @@ const BackupPage: React.FC = () => {
     }
   };
 
-  // Selección de backups locales
+  // ============================================
+  // ELIMINAR BACKUP LOCAL INDIVIDUAL
+  // ============================================
+
+  const handleDeleteLocalBackup = async (backup: LocalBackup) => {
+    setIsDeletingLocal(backup.id);
+    try {
+      // 1. Eliminar el contenido de localStorage
+      localStorage.removeItem(`todoapp_backup_${backup.fileName}`);
+      
+      // 2. Eliminar del historial
+      const history = backupService.getLocalBackups();
+      const newHistory = history.filter(h => h.fileName !== backup.fileName);
+      localStorage.setItem('todoapp_backup_history', JSON.stringify(newHistory));
+      
+      // 3. Recargar la lista de backups locales
+      loadLocalBackups();
+      
+      console.log(`✅ Backup local eliminado: ${backup.fileName}`);
+    } catch (error) {
+      console.error('Error eliminando backup local:', error);
+    } finally {
+      setIsDeletingLocal(null);
+    }
+  };
+
+  // ============================================
+  // SUBIR BACKUP A LA NUBE (LLAMADA REAL)
+  // ============================================
+
+  const uploadBackupToCloud = async (backup: LocalBackup): Promise<boolean> => {
+    try {
+      // Obtener el contenido del backup desde localStorage
+      const backupContent = backupContents.get(backup.fileName);
+      
+      if (!backupContent) {
+        console.error(`No se encontró contenido para el backup: ${backup.fileName}`);
+        // Intentar cargar directamente desde localStorage como fallback
+        const directStored = localStorage.getItem(`todoapp_backup_${backup.fileName}`);
+        if (directStored) {
+          const parsed = JSON.parse(directStored) as BackupData;
+          backupContents.set(backup.fileName, parsed);
+          return await uploadBackupToCloud(backup);
+        }
+        return false;
+      }
+
+      // Convertir BackupData a Record<string, unknown> para el tipo esperado
+      const notesData: Record<string, unknown> = backupContent as unknown as Record<string, unknown>;
+
+      const backupData: CloudBackupCreateData = {
+        file_name: backup.fileName,
+        file_size: JSON.stringify(backupContent).length,
+        note_count: backup.taskCount,
+        notes_data: notesData,
+        backup_type: 'manual',
+        device_name: 'Web Browser',
+        app_version: '2.6.0'
+      };
+
+      const result = await backupService.saveBackup(backupData);
+      
+      if (result.id) {
+        console.log(`✅ Backup ${backup.fileName} subido a la nube: ${result.id}`);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error(`❌ Error subiendo backup ${backup.fileName}:`, error);
+      return false;
+    }
+  };
+
+  // Subir backups locales seleccionados a la nube
+  const handleUploadSelected = async () => {
+    const selectedBackups = localBackups.filter(b => selectedLocalIds.has(b.id));
+    if (selectedBackups.length === 0) return;
+
+    setIsUploading(true);
+    setShowProgressModal(true);
+    
+    let uploaded = 0;
+    let failed = 0;
+    
+    for (let i = 0; i < selectedBackups.length; i++) {
+      const backup = selectedBackups[i];
+      setProgressText(`Subiendo ${i + 1} de ${selectedBackups.length}: ${backup.fileName}`);
+      setProgressPercent(Math.round(((i + 1) / selectedBackups.length) * 100));
+      
+      const success = await uploadBackupToCloud(backup);
+      if (success) {
+        uploaded++;
+      } else {
+        failed++;
+      }
+    }
+    
+    setShowProgressModal(false);
+    setIsUploading(false);
+    setSelectedLocalIds(new Set());
+    await loadCloudBackups();
+    await loadCloudStats();
+    
+    if (uploaded > 0) {
+      setModalTaskCount(uploaded);
+      setModalFileName(`${uploaded} backup(s) subidos a la nube`);
+      setShowSuccessModal(true);
+    }
+    
+    if (failed > 0) {
+      console.warn(`⚠️ ${failed} backup(s) no pudieron subirse`);
+    }
+  };
+
+  const handleUploadAll = () => {
+    setSelectedLocalIds(new Set(localBackups.map(b => b.id)));
+    handleUploadSelected();
+  };
+
+  // ============================================
+  // MANEJADORES DE SELECCIÓN
+  // ============================================
+
   const handleSelectLocal = (id: string) => {
     const newSet = new Set(selectedLocalIds);
     if (newSet.has(id)) {
@@ -165,41 +333,10 @@ const BackupPage: React.FC = () => {
     }
   };
 
-  // Subir backups locales a la nube
-  const handleUploadSelected = async () => {
-    const selectedBackups = localBackups.filter(b => selectedLocalIds.has(b.id));
-    if (selectedBackups.length === 0) return;
+  // ============================================
+  // MANEJADORES DE BACKUPS EN LA NUBE
+  // ============================================
 
-    setShowProgressModal(true);
-    setProgressText(`Subiendo ${selectedBackups.length} backup(s)...`);
-
-    let uploaded = 0;
-    for (let i = 0; i < selectedBackups.length; i++) {
-      const backup = selectedBackups[i];
-      setProgressText(`Subiendo ${i + 1} de ${selectedBackups.length}: ${backup.fileName}`);
-      setProgressPercent(Math.round(((i + 1) / selectedBackups.length) * 100));
-
-      // Simular delay para mostrar progreso
-      await new Promise(resolve => setTimeout(resolve, 500));
-      uploaded++;
-    }
-
-    setShowProgressModal(false);
-    setSelectedLocalIds(new Set());
-    await loadCloudBackups();
-    await loadCloudStats();
-
-    setModalTaskCount(uploaded);
-    setModalFileName(`${uploaded} backup(s) subidos`);
-    setShowSuccessModal(true);
-  };
-
-  const handleUploadAll = () => {
-    setSelectedLocalIds(new Set(localBackups.map(b => b.id)));
-    handleUploadSelected();
-  };
-
-  // Eliminar backup en la nube
   const handleDeleteCloudBackup = async (id: string) => {
     setIsDeleting(id);
     try {
@@ -213,37 +350,46 @@ const BackupPage: React.FC = () => {
     }
   };
 
-  // Restaurar desde backup en la nube
   const handleRestoreCloudBackup = async (backup: CloudBackupMetadata) => {
     if (!confirm(`¿Restaurar tareas desde "${backup.file_name}"?\n\nSe reemplazarán tus tareas actuales.`)) return;
 
     setIsRestoring(backup.id);
+    setShowProgressModal(true);
+    setProgressText(`Restaurando ${backup.note_count} tareas...`);
+    
     try {
       const fullBackup = await backupService.getBackup(backup.id);
-      if (fullBackup.notes_data && (fullBackup.notes_data as { tasks?: unknown[] }).tasks) {
-        const tasksToRestore = (fullBackup.notes_data as { tasks: unknown[] }).tasks;
-        
-        setShowProgressModal(true);
-        setProgressText(`Restaurando ${tasksToRestore.length} tareas...`);
-        
-        // Aquí iría la lógica para reemplazar tareas
-        await new Promise(resolve => setTimeout(resolve, 1500));
+      const notesData = fullBackup.notes_data as { tasks?: unknown[]; task_count?: number };
+      const tasksToRestore = notesData.tasks;
+      
+      if (tasksToRestore && Array.isArray(tasksToRestore)) {
+        // Simular progreso de restauración
+        for (let i = 0; i <= tasksToRestore.length; i++) {
+          await new Promise(resolve => setTimeout(resolve, 10));
+          setProgressPercent(Math.round((i / tasksToRestore.length) * 100));
+        }
         
         setShowProgressModal(false);
         setModalImportedCount(tasksToRestore.length);
         setModalTotalCount(tasksToRestore.length);
         setShowRestoreModal(true);
         await loadTaskCount();
+      } else {
+        throw new Error('No se encontraron tareas en el backup');
       }
     } catch (error) {
       console.error('Error restaurando backup:', error);
+      setShowProgressModal(false);
       alert('Error al restaurar el backup');
     } finally {
       setIsRestoring(null);
     }
   };
 
-  // Sincronización manual
+  // ============================================
+  // SINCRONIZACIÓN MANUAL
+  // ============================================
+
   const handleSync = async () => {
     setIsSyncing(true);
     try {
@@ -257,8 +403,12 @@ const BackupPage: React.FC = () => {
       }));
       const result = await backupService.syncBackups(syncData);
       setLastSyncDate(new Date().toLocaleString());
+      
       if (result.cloud_backups_to_download.length > 0) {
         alert(`${result.cloud_backups_to_download.length} backups disponibles para descargar en la nube.`);
+      }
+      if (result.synced_count > 0) {
+        alert(`${result.synced_count} backups pendientes de subir. Ve a la pestaña "Backups Locales" para subirlos.`);
       }
       await loadCloudBackups();
       await loadCloudStats();
@@ -269,19 +419,10 @@ const BackupPage: React.FC = () => {
     }
   };
 
-  // Limpiar historial local
-  const handleClearHistory = () => {
-    backupService.clearLocalBackupHistory();
-    loadLocalBackups();
-    setShowDangerModal(false);
-  };
+  // ============================================
+  // EXPORTAR BACKUP MANUAL (GUARDA EN LOCALSTORAGE)
+  // ============================================
 
-  // Restablecer contador
-  const handleResetCounter = () => {
-    setShowResetModal(false);
-  };
-
-  // Exportar backup manual
   const handleExportManual = async () => {
     setIsExporting(true);
     try {
@@ -313,6 +454,9 @@ const BackupPage: React.FC = () => {
       const timestamp = Date.now();
       const fileName = `todoapp_backup_${timestamp}.json`;
 
+      // Guardar en localStorage para poder subirlo después
+      localStorage.setItem(`todoapp_backup_${fileName}`, jsonString);
+
       const blob = new Blob([jsonString], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -337,7 +481,10 @@ const BackupPage: React.FC = () => {
     }
   };
 
-  // Importar backup manual
+  // ============================================
+  // IMPORTAR BACKUP MANUAL
+  // ============================================
+
   const handleImportManual = () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -349,17 +496,26 @@ const BackupPage: React.FC = () => {
       setIsImporting(true);
       try {
         const text = await file.text();
-        const data: BackupData = JSON.parse(text);
+        const data = JSON.parse(text) as BackupData;
 
         if (!data.tasks || !Array.isArray(data.tasks) || data.tasks.length === 0) {
           throw new Error('Formato inválido o sin tareas');
         }
 
+        // Guardar también en localStorage
+        localStorage.setItem(`todoapp_backup_${file.name}`, text);
+        backupService.addLocalBackup(data.tasks.length, file.name);
+        loadLocalBackups();
+
         setModalTotalCount(data.tasks.length);
         setShowProgressModal(true);
-
+        
         // Simular importación
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        for (let i = 0; i <= data.tasks.length; i++) {
+          await new Promise(resolve => setTimeout(resolve, 10));
+          setProgressPercent(Math.round((i / data.tasks.length) * 100));
+          setProgressText(`Importando ${i} de ${data.tasks.length} tareas...`);
+        }
 
         setShowProgressModal(false);
         setModalImportedCount(data.tasks.length);
@@ -375,6 +531,31 @@ const BackupPage: React.FC = () => {
     };
     input.click();
   };
+
+  // ============================================
+  // ZONA DE PELIGRO
+  // ============================================
+
+  const handleClearHistory = () => {
+    backupService.clearLocalBackupHistory();
+    loadLocalBackups();
+    setShowDangerModal(false);
+  };
+
+  const handleResetCounter = () => {
+    setShowResetModal(false);
+  };
+
+  // ============================================
+  // CARGA INICIAL
+  // ============================================
+
+  useEffect(() => {
+    loadTaskCount();
+    loadCloudBackups();
+    loadLocalBackups();
+    loadCloudStats();
+  }, []);
 
   const pendingUploads = localBackups.filter(b => !cloudBackups.some(cb => cb.file_name === b.file_name)).length;
 
@@ -414,7 +595,6 @@ const BackupPage: React.FC = () => {
         {/* Contenido según tab */}
         {activeTab === 'general' && (
           <div className="space-y-4">
-            {/* Estadísticas */}
             <BackupStats
               taskCount={taskCount}
               pendingCount={pendingCount}
@@ -424,10 +604,8 @@ const BackupPage: React.FC = () => {
               totalSizeMB={cloudStats.total_size_mb}
             />
 
-            {/* Backup Automático Programado */}
             <BackupAutoSchedule />
 
-            {/* Sincronización Manual */}
             <BackupSyncManual
               onSync={handleSync}
               isSyncing={isSyncing}
@@ -435,13 +613,12 @@ const BackupPage: React.FC = () => {
               lastSync={lastSyncDate || undefined}
             />
 
-            {/* Backup Selectivo */}
             <BackupSelective
               backups={cloudBackups}
               onUploadSelected={async (ids) => {
-                console.log('Subir backups:', ids);
+                console.log('Subir backups seleccionados:', ids);
               }}
-              isUploading={isSyncing}
+              isUploading={isUploading}
             />
 
             {/* Zona de Peligro */}
@@ -511,7 +688,9 @@ const BackupPage: React.FC = () => {
               onSelectAll={handleSelectAllLocal}
               onUploadSelected={handleUploadSelected}
               onUploadAll={handleUploadAll}
-              isUploading={isExporting}
+              onDeleteLocal={handleDeleteLocalBackup}
+              isUploading={isUploading}
+              isDeleting={isDeletingLocal}
             />
             <div className="flex gap-3">
               <button
@@ -555,7 +734,10 @@ const BackupPage: React.FC = () => {
         )}
       </div>
 
-      {/* Modales */}
+      {/* ============================================ */}
+      {/* MODALES */}
+      {/* ============================================ */}
+
       <AnimatePresence>
         {showProgressModal && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
