@@ -236,56 +236,56 @@ const TrashItem: React.FC<{
   };
 
   return (
-    <div className={`p-4 transition-all duration-200 ${classes.bg.hover} border-b border-gray-100 dark:border-gray-800 last:border-b-0`}>
-      <div className="flex items-start gap-4">
+    <div className={`p-3 sm:p-4 transition-all duration-200 ${classes.bg.hover} border-b border-gray-100 dark:border-gray-800 last:border-b-0`}>
+      <div className="flex items-start gap-3 sm:gap-4">
         <div className="flex-1">
-          <div className="flex flex-wrap items-center gap-2 mb-1">
-            <span className={`text-xs px-2 py-1 rounded-full ${getPriorityStyle(task.priority)}`}>
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
+            <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full ${getPriorityStyle(task.priority)}`}>
               {task.priority}
             </span>
-            <span className={`text-xs px-2 py-1 rounded-full ${classes.bg.secondary} ${classes.text.muted}`}>
+            <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full ${classes.bg.secondary} ${classes.text.muted}`}>
               {getCategoryIcon(task.category)} {task.category}
             </span>
             {task.isFavorite && (
-              <span className="text-xs px-2 py-1 rounded-full bg-amber-500/10 text-amber-500">
+              <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full bg-amber-500/10 text-amber-500">
                 <Star size={10} className="inline mr-1" />
                 Favorita
               </span>
             )}
             {task.isArchived && (
-              <span className="text-xs px-2 py-1 rounded-full bg-gray-500/10 text-gray-500">
+              <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full bg-gray-500/10 text-gray-500">
                 <Archive size={10} className="inline mr-1" />
                 Archivada
               </span>
             )}
-            <span className={`text-xs px-2 py-1 rounded-full bg-gray-500/10 ${classes.text.muted}`}>
+            <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full bg-gray-500/10 ${classes.text.muted}`}>
               <Clock size={10} className="inline mr-1" />
               {getDeletedDate()}
             </span>
           </div>
-          <h4 className={`font-medium ${task.completed ? 'line-through ' + classes.text.muted : classes.text.primary}`}>
+          <h4 className={`text-sm sm:text-base font-medium ${task.completed ? 'line-through ' + classes.text.muted : classes.text.primary}`}>
             {task.title}
           </h4>
           {task.description && (
-            <p className={`text-sm mt-1 line-clamp-1 ${classes.text.muted}`}>{task.description}</p>
+            <p className={`text-xs sm:text-sm mt-1 line-clamp-1 ${classes.text.muted}`}>{task.description}</p>
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-1.5 sm:gap-2">
           <button
             onClick={onRestore}
             disabled={isProcessing}
-            className={`p-2 rounded-lg transition-colors ${classes.bg.hover} text-emerald-500 hover:text-emerald-600 disabled:opacity-50`}
+            className={`p-1.5 sm:p-2 rounded-lg transition-colors ${classes.bg.hover} text-emerald-500 hover:text-emerald-600 disabled:opacity-50`}
             title="Restaurar"
           >
-            <RotateCcw size={18} />
+            <RotateCcw size={16} className="sm:w-[18px] sm:h-[18px]" />
           </button>
           <button
             onClick={onPermanentDelete}
             disabled={isProcessing}
-            className={`p-2 rounded-lg transition-colors ${classes.bg.hover} text-red-500 hover:text-red-600 disabled:opacity-50`}
+            className={`p-1.5 sm:p-2 rounded-lg transition-colors ${classes.bg.hover} text-red-500 hover:text-red-600 disabled:opacity-50`}
             title="Eliminar permanentemente"
           >
-            <Trash2 size={18} />
+            <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
           </button>
         </div>
       </div>
@@ -334,37 +334,37 @@ const TrashCard: React.FC<{
   };
 
   return (
-    <div className={`p-4 rounded-xl border ${classes.bg.card} ${classes.border.primary} shadow-sm hover:shadow-lg transition-all duration-200`}>
-      <div className="flex flex-wrap items-center gap-2 mb-2">
-        <span className={`text-xs px-2 py-1 rounded-full ${getPriorityStyle(task.priority)}`}>
+    <div className={`p-3 sm:p-4 rounded-xl border ${classes.bg.card} ${classes.border.primary} shadow-sm hover:shadow-lg transition-all duration-200`}>
+      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2">
+        <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full ${getPriorityStyle(task.priority)}`}>
           {task.priority}
         </span>
-        <span className={`text-xs px-2 py-1 rounded-full ${classes.bg.secondary} ${classes.text.muted}`}>
+        <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full ${classes.bg.secondary} ${classes.text.muted}`}>
           {getCategoryIcon(task.category)} {task.category}
         </span>
         {task.isFavorite && (
           <Star size={12} className="text-amber-500 fill-amber-500" />
         )}
-        <span className={`text-xs px-2 py-1 rounded-full ${classes.bg.secondary} ${classes.text.muted}`}>
+        <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full ${classes.bg.secondary} ${classes.text.muted}`}>
           <Clock size={10} className="inline mr-1" />
           {getDeletedDate()}
         </span>
       </div>
-      <h4 className={`font-medium mb-1 ${task.completed ? 'line-through ' + classes.text.muted : classes.text.primary}`}>
+      <h4 className={`text-sm sm:text-base font-medium mb-1 ${task.completed ? 'line-through ' + classes.text.muted : classes.text.primary}`}>
         {task.title}
       </h4>
       {task.description && (
-        <p className={`text-xs mb-3 line-clamp-2 ${classes.text.muted}`}>{task.description}</p>
+        <p className={`text-xs sm:text-sm mb-3 line-clamp-2 ${classes.text.muted}`}>{task.description}</p>
       )}
       <div className={`flex items-center justify-between pt-3 border-t ${classes.border.primary}`}>
-        <div className="flex gap-1">
+        <div className="flex gap-1.5 sm:gap-2">
           <button
             onClick={onRestore}
             disabled={isProcessing}
             className={`p-1.5 rounded-lg ${classes.bg.hover} text-emerald-500 disabled:opacity-50`}
             title="Restaurar"
           >
-            <RotateCcw size={14} />
+            <RotateCcw size={14} className="sm:w-[16px] sm:h-[16px]" />
           </button>
           <button
             onClick={onPermanentDelete}
@@ -372,7 +372,7 @@ const TrashCard: React.FC<{
             className={`p-1.5 rounded-lg ${classes.bg.hover} text-red-500 disabled:opacity-50`}
             title="Eliminar permanentemente"
           >
-            <Trash2 size={14} />
+            <Trash2 size={14} className="sm:w-[16px] sm:h-[16px]" />
           </button>
         </div>
         {task.completed && (
@@ -560,33 +560,48 @@ const TrashPage: React.FC = () => {
   if (!safeUser) return null;
 
   return (
-    <div className={`min-h-screen ${classes.bg.primary} flex`}>
-      <LeftMenu isOpen={isLeftMenuOpen} onClose={toggleLeftMenu} user={safeUser} onLogout={handleLogout} />
+    <div className={`min-h-screen ${classes.bg.primary}`}>
+      {/* LeftMenu - Overlay puro */}
+      <LeftMenu 
+        isOpen={isLeftMenuOpen} 
+        onClose={toggleLeftMenu} 
+        user={safeUser} 
+        onLogout={handleLogout} 
+      />
 
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${isLeftMenuOpen ? 'ml-64' : 'ml-20'}`}>
-        <Header user={safeUser} onLogout={handleLogout} notifications={notifications} onSearch={setSearchQuery} />
+      {/* Main Content - SIN MÁRGENES IZQUIERDOS */}
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <Header 
+          user={safeUser} 
+          onLogout={handleLogout} 
+          notifications={notifications} 
+          onSearch={setSearchQuery}
+          onMenuToggle={toggleLeftMenu}
+        />
 
-        <main className="flex-1 p-4 overflow-auto">
-          <div className="max-w-7xl mx-auto">
-            {/* Header */}
-            <div className="flex items-center justify-between gap-4 mb-4">
-              <div className="flex items-center gap-3">
+        {/* Page Content - CERO MÁRGENES */}
+        <main className="flex-1 overflow-auto">
+          <div className="w-full px-2 sm:px-3 py-2 sm:py-3">
+            {/* Header de la página */}
+            <div className="flex items-center justify-between gap-3 mb-3 sm:mb-4">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <button 
                   onClick={() => navigate('/tareas')} 
-                  className={`p-2 rounded-lg transition-colors ${classes.bg.hover}`}
+                  className={`p-1.5 sm:p-2 rounded-lg transition-colors ${classes.bg.hover}`}
                   title="Volver a mis tareas"
                 >
-                  <ArrowLeft className={`w-5 h-5 ${classes.icon.secondary}`} />
+                  <ArrowLeft className={`w-4 h-4 sm:w-5 sm:h-5 ${classes.icon.secondary}`} />
                 </button>
                 <div className="flex items-center gap-2">
-                  <div className="w-1 h-6 bg-gradient-to-b from-red-500 to-pink-500 rounded-full" />
-                  <h1 className={`text-xl font-bold flex items-center gap-2 ${classes.text.primary}`}>
-                    <Trash2 className="text-red-500" size={20} />
+                  <div className="w-1 h-5 sm:h-6 bg-gradient-to-b from-red-500 to-pink-500 rounded-full" />
+                  <h1 className={`text-base sm:text-xl font-bold flex items-center gap-2 ${classes.text.primary}`}>
+                    <Trash2 className="text-red-500" size={16} />
                     Papelera
                   </h1>
                 </div>
                 {deletedTasks.length > 0 && (
-                  <span className="px-2 py-0.5 bg-red-500/10 text-red-500 rounded-full text-xs">
+                  <span className="px-1.5 sm:px-2 py-0.5 bg-red-500/10 text-red-500 rounded-full text-[10px] sm:text-xs">
                     {deletedTasks.length}
                   </span>
                 )}
@@ -595,35 +610,35 @@ const TrashPage: React.FC = () => {
                 <button
                   onClick={handleClearAll}
                   disabled={isProcessing}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 bg-red-500/10 text-red-500 hover:bg-red-500/20 disabled:opacity-50`}
+                  className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-all flex items-center gap-1 sm:gap-1.5 bg-red-500/10 text-red-500 hover:bg-red-500/20 disabled:opacity-50`}
                 >
-                  <Trash2 size={14} />
+                  <Trash2 size={12} className="sm:w-[14px] sm:h-[14px]" />
                   Vaciar papelera
                 </button>
               )}
             </div>
 
-            {/* Tarjetas de estadísticas optimizadas */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-              <StatCard title="Tareas eliminadas" value={stats.total} icon={<Trash2 size={16} />} color="gray" />
-              <StatCard title="Completadas" value={stats.totalCompleted} icon={<CheckCircle size={16} />} color="teal" />
-              <StatCard title="Pendientes" value={stats.totalPending} icon={<Clock size={16} />} color="amber" />
-              <StatCard title="Días en papelera" value={stats.totalDays} icon={<Calendar size={16} />} color="cyan" />
+            {/* Tarjetas de estadísticas compactas */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-3 sm:mb-4">
+              <StatCard title="Tareas eliminadas" value={stats.total} icon={<Trash2 size={14} />} color="gray" />
+              <StatCard title="Completadas" value={stats.totalCompleted} icon={<CheckCircle size={14} />} color="teal" />
+              <StatCard title="Pendientes" value={stats.totalPending} icon={<Clock size={14} />} color="amber" />
+              <StatCard title="Días en papelera" value={stats.totalDays} icon={<Calendar size={14} />} color="cyan" />
             </div>
 
             {deletedTasks.length === 0 ? (
-              <div className={`rounded-2xl border p-12 text-center ${classes.bg.card} ${classes.border.primary}`}>
-                <div className="flex flex-col items-center gap-4">
-                  <div className="w-20 h-20 rounded-full bg-gray-500/10 flex items-center justify-center">
-                    <Trash2 size={40} className="text-gray-500" />
+              <div className={`rounded-xl border p-6 sm:p-8 text-center ${classes.bg.card} ${classes.border.primary}`}>
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gray-500/10 flex items-center justify-center">
+                    <Trash2 size={32} className="text-gray-500" />
                   </div>
-                  <h2 className={`text-xl font-bold ${classes.text.primary}`}>Papelera vacía</h2>
-                  <p className={`text-sm ${classes.text.secondary} max-w-md`}>
+                  <h2 className={`text-base sm:text-xl font-bold ${classes.text.primary}`}>Papelera vacía</h2>
+                  <p className={`text-xs sm:text-sm ${classes.text.secondary} max-w-md`}>
                     Las tareas que elimines aparecerán aquí. Puedes restaurarlas o eliminarlas permanentemente.
                   </p>
                   <button 
                     onClick={() => navigate('/tareas')} 
-                    className={`mt-2 px-5 py-2 rounded-lg font-medium transition-all text-sm ${classes.button.primary}`}
+                    className={`mt-2 px-4 sm:px-5 py-1.5 sm:py-2 rounded-lg font-medium transition-all text-xs sm:text-sm ${classes.button.primary}`}
                   >
                     Ir a mis tareas
                   </button>
@@ -631,14 +646,14 @@ const TrashPage: React.FC = () => {
               </div>
             ) : (
               <>
-                {/* Filtros */}
-                <div className={`rounded-xl shadow-md p-3 mb-4 ${classes.bg.card} ${classes.border.primary} border`}>
-                  <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-                    <div className="flex items-center gap-1.5">
-                      <Filter size={14} className={classes.icon.secondary} />
+                {/* Filtros rápidos - compactos */}
+                <div className={`rounded-lg shadow-md p-2 sm:p-3 mb-3 sm:mb-4 ${classes.bg.card} ${classes.border.primary} border`}>
+                  <div className="flex items-center justify-between mb-2 sm:mb-3 flex-wrap gap-2">
+                    <div className="flex items-center gap-1">
+                      <Filter size={12} className={classes.icon.secondary} />
                       <span className={`text-xs font-medium ${classes.text.primary}`}>Filtros</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
                       <ViewToggle viewMode={viewMode} onViewChange={setViewMode} />
                       <select
                         value={`${sortBy}-${sortOrder}`}
@@ -646,16 +661,16 @@ const TrashPage: React.FC = () => {
                           const [newSortBy, newSortOrder] = e.target.value.split('-');
                           handleSortChange(newSortBy as TaskSortBy, newSortOrder as TaskSortOrder);
                         }}
-                        className={`text-xs px-2 py-1.5 rounded-lg border ${classes.bg.input} ${classes.text.primary} ${classes.border.primary}`}
+                        className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-1 rounded-lg border ${classes.bg.input} ${classes.text.primary} ${classes.border.primary}`}
                         title="Ordenar tareas"
                         aria-label="Ordenar tareas"
                       >
-                        <option value="date-desc">📅 Más recientes eliminadas</option>
-                        <option value="date-asc">📅 Más antiguas eliminadas</option>
+                        <option value="date-desc">📅 Más recientes</option>
+                        <option value="date-asc">📅 Más antiguas</option>
                         <option value="priority-desc">⚠️ Mayor prioridad</option>
                         <option value="priority-asc">⚠️ Menor prioridad</option>
-                        <option value="title-asc">🔤 Título A-Z</option>
-                        <option value="title-desc">🔤 Título Z-A</option>
+                        <option value="title-asc">🔤 A-Z</option>
+                        <option value="title-desc">🔤 Z-A</option>
                       </select>
                     </div>
                   </div>
@@ -668,38 +683,38 @@ const TrashPage: React.FC = () => {
                 </div>
 
                 {/* Botón restaurar todo */}
-                <div className="flex justify-end mb-3">
+                <div className="flex justify-end mb-2 sm:mb-3">
                   <button
                     onClick={handleRestoreAll}
                     disabled={isProcessing}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${classes.button.secondary} disabled:opacity-50`}
+                    className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-all flex items-center gap-1 sm:gap-1.5 ${classes.button.secondary} disabled:opacity-50`}
                   >
-                    <RotateCcw size={14} />
+                    <RotateCcw size={12} className="sm:w-[14px] sm:h-[14px]" />
                     Restaurar todas
                   </button>
                 </div>
 
                 {/* Lista de tareas */}
-                <div className={`rounded-xl shadow-lg overflow-hidden ${classes.bg.card} ${classes.border.primary} border`}>
-                  <div className={`p-3 border-b ${classes.border.primary} flex justify-between items-center`}>
-                    <h3 className={`text-sm font-medium ${classes.text.primary}`}>
+                <div className={`rounded-lg shadow-md overflow-hidden ${classes.bg.card} ${classes.border.primary} border`}>
+                  <div className={`p-2 sm:p-3 border-b ${classes.border.primary} flex justify-between items-center`}>
+                    <h3 className={`text-xs sm:text-sm font-medium ${classes.text.primary}`}>
                       {filteredTasks.length} {filteredTasks.length === 1 ? 'tarea eliminada' : 'tareas eliminadas'}
                       {hasActiveFilters && ' filtradas'}
                     </h3>
                     {hasActiveFilters && (
-                      <button onClick={clearFilters} className={`text-xs px-2 py-0.5 rounded ${classes.bg.hover} ${classes.text.muted}`}>
-                        Limpiar filtros
+                      <button onClick={clearFilters} className={`text-[10px] px-1.5 sm:px-2 py-0.5 rounded ${classes.bg.hover} ${classes.text.muted}`}>
+                        Limpiar
                       </button>
                     )}
                   </div>
 
                   {filteredTasks.length === 0 ? (
-                    <div className="text-center py-12">
-                      <div className={`w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center ${classes.bg.secondary}`}>
-                        <Sparkles size={28} className={classes.icon.secondary} />
+                    <div className="text-center py-8 sm:py-12">
+                      <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full mx-auto mb-2 sm:mb-3 flex items-center justify-center ${classes.bg.secondary}`}>
+                        <Sparkles size={20} className={classes.icon.secondary} />
                       </div>
-                      <h3 className={`text-base font-medium mb-1 ${classes.text.primary}`}>No hay tareas eliminadas</h3>
-                      <p className={`text-xs ${classes.text.secondary}`}>
+                      <h3 className={`text-sm sm:text-base font-medium mb-1 ${classes.text.primary}`}>No hay tareas eliminadas</h3>
+                      <p className={`text-[10px] sm:text-xs ${classes.text.secondary}`}>
                         {hasActiveFilters ? 'No se encontraron tareas con esos filtros' : 'Las tareas que elimines aparecerán aquí'}
                       </p>
                     </div>
@@ -726,7 +741,7 @@ const TrashPage: React.FC = () => {
                       </AnimatePresence>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 p-2 sm:p-3">
                       <AnimatePresence>
                         {filteredTasks.map((task, index) => (
                           <motion.div
@@ -750,16 +765,15 @@ const TrashPage: React.FC = () => {
                   )}
                 </div>
 
-                {/* Mensaje informativo */}
-                <div className="mt-4">
-                  <div className={`rounded-xl overflow-hidden bg-gradient-to-r from-amber-500/10 to-orange-500/10 backdrop-blur-sm border border-amber-500/20 p-3`}>
-                    <div className="flex items-start gap-2">
-                      <Info size={16} className="text-amber-500 shrink-0 mt-0.5" />
+                {/* Mensaje informativo compacto */}
+                <div className="mt-3 sm:mt-4">
+                  <div className={`rounded-lg overflow-hidden bg-gradient-to-r from-amber-500/10 to-orange-500/10 backdrop-blur-sm border border-amber-500/20 p-2 sm:p-3`}>
+                    <div className="flex items-start gap-1.5 sm:gap-2">
+                      <Info size={12} className="text-amber-500 shrink-0 mt-0.5" />
                       <div>
-                        <h4 className={`text-xs font-semibold ${classes.text.primary} mb-0.5`}>⏳ Información importante</h4>
-                        <p className={`text-[11px] ${classes.text.secondary}`}>
-                          Las tareas en la papelera se pueden restaurar en cualquier momento. 
-                          Se eliminan permanentemente solo cuando confirmas la acción.
+                        <h4 className={`text-[10px] sm:text-xs font-semibold ${classes.text.primary} mb-0.5`}>Información importante</h4>
+                        <p className={`text-[9px] sm:text-[11px] ${classes.text.secondary}`}>
+                          Las tareas en la papelera se pueden restaurar. Se eliminan permanentemente solo cuando confirmas la acción.
                         </p>
                       </div>
                     </div>

@@ -186,7 +186,7 @@ const ArchivedPage: React.FC = () => {
     filteredTasks.forEach(task => handleRestoreTask(task.id));
   }, [filteredTasks, handleRestoreTask]);
 
-  // Manejar toggle de favorito (opcional, pero incluido por si acaso)
+  // Manejar toggle de favorito (opcional)
   const handleToggleFavorite = useCallback((id: string) => {
     const task = tasks.find(t => t.id === id);
     if (task) {
@@ -224,8 +224,8 @@ const ArchivedPage: React.FC = () => {
   }
 
   return (
-    <div className={`min-h-screen ${classes.bg.primary} flex`}>
-      {/* LeftMenu */}
+    <div className={`min-h-screen ${classes.bg.primary}`}>
+      {/* LeftMenu - Overlay puro */}
       <LeftMenu 
         isOpen={isLeftMenuOpen}
         onClose={toggleLeftMenu}
@@ -233,8 +233,8 @@ const ArchivedPage: React.FC = () => {
         onLogout={handleLogout}
       />
 
-      {/* Main Content */}
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${isLeftMenuOpen ? 'ml-64' : 'ml-20'}`}>
+      {/* Main Content - SIN MÁRGENES IZQUIERDOS */}
+      <div className="flex-1 flex flex-col">
         {/* Header */}
         <Header
           user={safeUser}
@@ -243,61 +243,62 @@ const ArchivedPage: React.FC = () => {
           onMarkNotificationAsRead={() => {}}
           onClearAllNotifications={() => {}}
           onSearch={setSearchQuery}
+          onMenuToggle={toggleLeftMenu}
         />
 
-        {/* Page Content */}
-        <main className="flex-1 p-6 overflow-auto">
-          <div className="max-w-7xl mx-auto">
+        {/* Page Content - CERO MÁRGENES */}
+        <main className="flex-1 overflow-auto">
+          <div className="w-full px-2 sm:px-3 py-2 sm:py-3">
             {/* Confetti Effect */}
             <ConfettiEffect 
               isActive={showConfetti} 
               onComplete={() => setShowConfetti(false)} 
             />
 
-            {/* Header de la página */}
-            <div className="flex items-center gap-4 mb-6">
+            {/* Header de la página - compacto */}
+            <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
               <button
                 onClick={() => navigate('/')}
-                className={`p-2 rounded-lg transition-colors ${classes.bg.hover}`}
+                className={`p-1.5 sm:p-2 rounded-lg transition-colors ${classes.bg.hover}`}
                 aria-label="Volver al inicio"
               >
-                <ArrowLeft className={`w-5 h-5 ${classes.icon.secondary}`} />
+                <ArrowLeft className={`w-4 h-4 sm:w-5 sm:h-5 ${classes.icon.secondary}`} />
               </button>
-              <div className="flex items-center gap-3">
-                <div className="w-1.5 h-8 bg-gradient-to-b from-gray-500 to-gray-600 rounded-full" />
-                <h1 className={`text-2xl font-bold flex items-center gap-2 ${classes.text.primary}`}>
-                  <Archive className="text-gray-500" size={24} />
+              <div className="flex items-center gap-2">
+                <div className="w-1 h-5 sm:h-6 bg-gradient-to-b from-gray-500 to-gray-600 rounded-full" />
+                <h1 className={`text-lg sm:text-xl font-bold flex items-center gap-2 ${classes.text.primary}`}>
+                  <Archive className="text-gray-500" size={18} />
                   Tareas Archivadas
                 </h1>
               </div>
             </div>
 
-            {/* Tarjetas de estadísticas de archivados */}
+            {/* Tarjetas de estadísticas de archivados - compactas */}
             {stats.total > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-4 sm:mb-5">
                 <StatCard
                   title="Total Archivadas"
                   value={stats.total}
-                  icon={<Archive size={20} className="text-gray-500" />}
+                  icon={<Archive size={16} className="text-gray-500" />}
                   color="gray"
                 />
                 <StatCard
                   title="Completadas"
                   value={stats.completed}
-                  icon={<CheckCircle size={20} />}
+                  icon={<CheckCircle size={16} />}
                   color="teal"
                   trend={{ value: stats.completionPercentage, positive: stats.completionPercentage >= 50 }}
                 />
                 <StatCard
                   title="Pendientes"
                   value={stats.pending}
-                  icon={<Clock size={20} />}
+                  icon={<Clock size={16} />}
                   color="amber"
                 />
                 <StatCard
                   title="Alta Prioridad"
                   value={stats.byPriority.alta}
-                  icon={<Flag size={20} />}
+                  icon={<Flag size={16} />}
                   color="red"
                 />
               </div>
@@ -305,18 +306,18 @@ const ArchivedPage: React.FC = () => {
 
             {/* Mensaje cuando no hay archivados */}
             {stats.total === 0 ? (
-              <div className={`rounded-2xl border p-12 text-center ${classes.bg.card} ${classes.border.primary}`}>
-                <div className="flex flex-col items-center gap-4">
-                  <div className="w-24 h-24 rounded-full bg-gray-500/10 flex items-center justify-center">
-                    <FolderOpen size={48} className="text-gray-500" />
+              <div className={`rounded-xl border p-6 sm:p-8 text-center ${classes.bg.card} ${classes.border.primary}`}>
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gray-500/10 flex items-center justify-center">
+                    <FolderOpen size={32} className="text-gray-500" />
                   </div>
-                  <h2 className={`text-xl font-bold ${classes.text.primary}`}>No hay tareas archivadas</h2>
-                  <p className={`text-sm ${classes.text.secondary} max-w-md`}>
+                  <h2 className={`text-lg sm:text-xl font-bold ${classes.text.primary}`}>No hay tareas archivadas</h2>
+                  <p className={`text-xs sm:text-sm ${classes.text.secondary} max-w-md`}>
                     Las tareas que archives aparecerán aquí. Puedes restaurarlas cuando quieras.
                   </p>
                   <button
                     onClick={() => navigate('/tareas')}
-                    className={`mt-4 px-6 py-2 rounded-lg font-medium transition-all ${classes.button.primary}`}
+                    className={`mt-2 px-4 sm:px-5 py-1.5 sm:py-2 rounded-lg font-medium transition-all text-sm ${classes.button.primary}`}
                   >
                     Ir a mis tareas
                   </button>
@@ -324,12 +325,12 @@ const ArchivedPage: React.FC = () => {
               </div>
             ) : (
               <>
-                {/* Filtros rápidos */}
-                <div className={`rounded-xl shadow-md p-4 mb-6 ${classes.bg.card} ${classes.border.primary} border`}>
-                  <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-                    <div className="flex items-center gap-2">
-                      <Filter size={18} className={classes.icon.secondary} />
-                      <span className={`font-medium ${classes.text.primary}`}>Filtros</span>
+                {/* Filtros rápidos - compactos */}
+                <div className={`rounded-lg shadow-md p-3 sm:p-4 mb-4 sm:mb-5 ${classes.bg.card} ${classes.border.primary} border`}>
+                  <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <Filter size={14} className={classes.icon.secondary} />
+                      <span className={`text-sm font-medium ${classes.text.primary}`}>Filtros</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <ViewToggle viewMode={viewMode} onViewChange={setViewMode} />
@@ -339,7 +340,7 @@ const ArchivedPage: React.FC = () => {
                           const [newSortBy, newSortOrder] = e.target.value.split('-');
                           handleSortChange(newSortBy as TaskSortBy, newSortOrder as TaskSortOrder);
                         }}
-                        className={`text-sm px-3 py-1.5 rounded-lg border ${classes.bg.input} ${classes.text.primary} ${classes.border.primary}`}
+                        className={`text-xs sm:text-sm px-2 sm:px-3 py-1 rounded-lg border ${classes.bg.input} ${classes.text.primary} ${classes.border.primary}`}
                         aria-label="Ordenar tareas"
                         title="Ordenar tareas"
                       >
@@ -366,9 +367,9 @@ const ArchivedPage: React.FC = () => {
                 </div>
 
                 {/* Lista de tareas archivadas */}
-                <div className={`rounded-xl shadow-lg overflow-hidden ${classes.bg.card} ${classes.border.primary} border`}>
-                  <div className={`p-4 border-b ${classes.border.primary} flex justify-between items-center`}>
-                    <h3 className={`font-medium ${classes.text.primary}`}>
+                <div className={`rounded-lg shadow-md overflow-hidden ${classes.bg.card} ${classes.border.primary} border`}>
+                  <div className={`p-3 sm:p-4 border-b ${classes.border.primary} flex justify-between items-center`}>
+                    <h3 className={`text-sm font-medium ${classes.text.primary}`}>
                       {filteredTasks.length} {filteredTasks.length === 1 ? 'tarea archivada' : 'tareas archivadas'}
                       {hasActiveFilters && ' filtradas'}
                     </h3>
@@ -385,12 +386,12 @@ const ArchivedPage: React.FC = () => {
                   </div>
 
                   {filteredTasks.length === 0 ? (
-                    <div className="text-center py-16">
-                      <div className={`w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center ${classes.bg.secondary}`}>
-                        <Sparkles size={32} className={classes.icon.secondary} />
+                    <div className="text-center py-12 sm:py-16">
+                      <div className={`w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center ${classes.bg.secondary}`}>
+                        <Sparkles size={24} className={classes.icon.secondary} />
                       </div>
-                      <h3 className={`text-lg font-medium mb-2 ${classes.text.primary}`}>No hay tareas archivadas</h3>
-                      <p className={classes.text.secondary}>
+                      <h3 className={`text-base sm:text-lg font-medium mb-1 ${classes.text.primary}`}>No hay tareas archivadas</h3>
+                      <p className={`text-xs sm:text-sm ${classes.text.secondary}`}>
                         {hasActiveFilters
                           ? 'No se encontraron tareas archivadas con esos filtros'
                           : 'Las tareas que archives aparecerán aquí'}
@@ -410,7 +411,7 @@ const ArchivedPage: React.FC = () => {
                       ))}
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-3">
                       {filteredTasks.map((task, index) => (
                         <TaskCard
                           key={`archived-card-${task.id}-${index}`}
@@ -425,16 +426,16 @@ const ArchivedPage: React.FC = () => {
                   )}
                 </div>
 
-                {/* Botón para restaurar todas las tareas (opcional) */}
+                {/* Botón para restaurar todas las tareas */}
                 {filteredTasks.length > 0 && (
-                  <div className="mt-6 flex justify-end">
+                  <div className="mt-4 flex justify-end">
                     <button
                       onClick={handleRestoreAllTasks}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${classes.button.secondary}`}
+                      className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-2 ${classes.button.secondary}`}
                       aria-label="Restaurar todas las tareas"
                       title="Restaurar todas las tareas"
                     >
-                      <RotateCcw size={16} />
+                      <RotateCcw size={14} />
                       Restaurar todas
                     </button>
                   </div>

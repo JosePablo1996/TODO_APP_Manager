@@ -310,7 +310,10 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, user, onLogout }) 
     }
   };
 
-  if (!isOpen) return null;
+  // Si el menú NO está abierto, no renderizamos nada (ni botón flotante)
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <>
@@ -330,7 +333,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, user, onLogout }) 
         <div className="absolute inset-0 bg-gradient-to-tr from-emerald-900/60 via-teal-900/40 to-cyan-900/60 backdrop-blur-md" />
       </motion.div>
       
-      {/* Menú lateral - SIN BORDE */}
+      {/* Menú lateral - overlay puro */}
       <motion.div
         initial={{ x: -400 }}
         animate={{ x: 0 }}

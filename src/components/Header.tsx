@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import LeftMenu from './LeftMenu';
 import RightMenu from './RightMenu';
 import ThemeToggle from './ThemeToggle';
+import GreetingWidget from './widgets/GreetingWidget';
 import { 
   Bell,
   Search,
@@ -13,12 +14,8 @@ import {
   AlertCircle,
   Check,
   Menu,
-  Sun,
-  Moon,
   Star,
   Edit3,
-  Sparkles,
-  Calendar,
   ChevronDown
 } from 'lucide-react';
 import type { UserProfile } from '../services/authService';
@@ -39,6 +36,7 @@ interface HeaderProps {
   onMarkNotificationAsRead?: (id: string) => void;
   onClearAllNotifications?: () => void;
   onSearch?: (query: string) => void;
+  onMenuToggle?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ 
@@ -47,7 +45,8 @@ const Header: React.FC<HeaderProps> = ({
   notifications = [],
   onMarkNotificationAsRead,
   onClearAllNotifications,
-  onSearch
+  onSearch,
+  onMenuToggle
 }) => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isLeftMenuOpen, setIsLeftMenuOpen] = useState(false);
@@ -58,52 +57,6 @@ const Header: React.FC<HeaderProps> = ({
   const notificationsDropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const notificationsButtonRef = useRef<HTMLButtonElement>(null);
-
-  // Determinar saludo según la hora
-  const greeting = useMemo(() => {
-    const hour = new Date().getHours();
-    const dayName = new Date().toLocaleDateString('es-ES', { weekday: 'long' });
-    const formattedDay = dayName.charAt(0).toUpperCase() + dayName.slice(1);
-    const date = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long' });
-    
-    if (hour >= 5 && hour < 12) {
-      return { 
-        text: 'Buenos días', 
-        icon: <Sun className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />,
-        bgColor: 'bg-gradient-to-r from-emerald-500/20 via-teal-500/15 to-cyan-500/20',
-        borderColor: 'border-emerald-200/50 dark:border-emerald-700/30',
-        textColor: 'text-emerald-700 dark:text-emerald-300',
-        accentColor: 'text-emerald-500',
-        day: formattedDay,
-        date: date,
-        gradient: 'from-emerald-500 to-teal-500'
-      };
-    } else if (hour >= 12 && hour < 19) {
-      return { 
-        text: 'Buenas tardes', 
-        icon: <Sun className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />,
-        bgColor: 'bg-gradient-to-r from-teal-500/20 via-cyan-500/15 to-teal-500/20',
-        borderColor: 'border-teal-200/50 dark:border-teal-700/30',
-        textColor: 'text-teal-700 dark:text-teal-300',
-        accentColor: 'text-teal-500',
-        day: formattedDay,
-        date: date,
-        gradient: 'from-teal-500 to-cyan-500'
-      };
-    } else {
-      return { 
-        text: 'Buenas noches', 
-        icon: <Moon className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400" />,
-        bgColor: 'bg-gradient-to-r from-cyan-500/20 via-blue-500/15 to-indigo-500/20',
-        borderColor: 'border-cyan-200/50 dark:border-cyan-700/30',
-        textColor: 'text-cyan-700 dark:text-cyan-300',
-        accentColor: 'text-cyan-500',
-        day: formattedDay,
-        date: date,
-        gradient: 'from-cyan-500 to-blue-500'
-      };
-    }
-  }, []);
 
   // Cerrar dropdowns al hacer clic fuera
   useEffect(() => {
@@ -190,18 +143,19 @@ const Header: React.FC<HeaderProps> = ({
 
   // Obtener color de fondo para avatar
   const getAvatarColor = (): string => {
-    if (displayName === 'Usuario') return 'from-emerald-500 to-cyan-500';
+    if (displayName === 'Usuario') return 'from-amber-400 to-orange-500';
     
     const gradients = [
-      'from-emerald-500 to-teal-500',
-      'from-teal-500 to-cyan-500',
-      'from-cyan-500 to-blue-500',
-      'from-green-500 to-emerald-500',
-      'from-emerald-500 to-cyan-500',
-      'from-teal-500 to-emerald-500',
-      'from-cyan-500 to-teal-500',
-      'from-blue-500 to-cyan-500',
-      'from-emerald-600 to-teal-600'
+      'from-amber-400 to-orange-500',
+      'from-amber-500 to-orange-600',
+      'from-orange-400 to-red-500',
+      'from-yellow-400 to-amber-500',
+      'from-emerald-400 to-teal-500',
+      'from-teal-400 to-cyan-500',
+      'from-cyan-400 to-blue-500',
+      'from-blue-400 to-indigo-500',
+      'from-indigo-400 to-purple-500',
+      'from-purple-400 to-pink-500'
     ];
     
     const charCodeSum = displayName.split('').reduce((sum: number, char: string) => sum + char.charCodeAt(0), 0);
@@ -212,6 +166,15 @@ const Header: React.FC<HeaderProps> = ({
 
   const handleAvatarError = () => {
     setAvatarError(true);
+  };
+
+  // Manejar apertura de menú
+  const handleMenuToggle = () => {
+    if (onMenuToggle) {
+      onMenuToggle();
+    } else {
+      setIsLeftMenuOpen(true);
+    }
   };
 
   return (
@@ -236,46 +199,67 @@ const Header: React.FC<HeaderProps> = ({
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 100, damping: 20 }}
-        className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-lg border-b border-gray-200/50 dark:border-gray-800/50"
+        className="sticky top-0 z-40 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 shadow-xl"
       >
         <div className="mx-auto px-3 sm:px-4 lg:px-6">
-          {/* Header superior - RESPONSIVE */}
+          {/* Widget de saludo - Solo visible en desktop */}
+          <div className="hidden md:block pt-3 pb-2">
+            <GreetingWidget 
+              userName={displayName}
+            />
+          </div>
+
+          {/* Header superior */}
           <div className="flex justify-between items-center h-12 sm:h-14 lg:h-16">
-            {/* Logo y nombre - lado izquierdo */}
+            {/* Logo y nombre - CON NUEVOS COLORES */}
             <div className="flex items-center space-x-2 sm:space-x-3">
-              {/* Botón para abrir menú lateral izquierdo */}
+              {/* Botón para abrir menú */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setIsLeftMenuOpen(true)}
-                className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl hover:bg-gray-100/80 dark:hover:bg-gray-800/80 transition-all duration-300 text-gray-600 dark:text-gray-300 backdrop-blur-sm"
+                onClick={handleMenuToggle}
+                className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl hover:bg-white/20 transition-all duration-300 text-white backdrop-blur-sm"
                 aria-label="Abrir menú"
               >
                 <Menu size={18} className="sm:w-[20px] sm:h-[20px] lg:w-[22px] lg:h-[22px]" />
               </motion.button>
 
-              {/* Logo TodoApp - RESPONSIVE */}
+              {/* Logo - CON NUEVO COLOR (blanco con destello) */}
               <Link to="/" className="flex items-center space-x-2 sm:space-x-3 group">
                 <div className="relative">
-                  <div className="w-7 h-7 sm:w-9 sm:h-9 lg:w-10 lg:h-10 bg-gradient-to-br from-emerald-500 to-cyan-500 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all group-hover:scale-105">
-                    <Edit3 size={16} className="sm:w-[20px] sm:h-[20px] lg:w-[22px] lg:h-[22px] text-white" />
+                  <div className="w-7 h-7 sm:w-9 sm:h-9 lg:w-10 lg:h-10 bg-white rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all group-hover:scale-105">
+                    <Edit3 size={16} className="sm:w-[20px] sm:h-[20px] lg:w-[22px] lg:h-[22px] text-emerald-600" />
                   </div>
                   <Star className="absolute -top-1 -right-1 w-2.5 h-2.5 sm:w-3 sm:h-3 text-yellow-400 fill-yellow-400 animate-pulse" />
                 </div>
                 
+                {/* Nombre de la aplicación - CON NUEVOS COLORES */}
                 <div className="flex flex-col">
-                  <span className="text-sm sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-cyan-600 dark:from-emerald-400 dark:to-cyan-400 bg-clip-text text-transparent leading-tight">
+                  <span className="text-sm sm:text-xl lg:text-2xl font-bold text-white drop-shadow-lg tracking-tight">
                     TodoAppManager
                   </span>
-                  <span className="text-[0.5rem] sm:text-[0.6rem] bg-emerald-100/80 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 px-1 sm:px-1.5 py-0.5 rounded-full border border-emerald-200/50 dark:border-emerald-800/50 inline-block w-fit leading-none backdrop-blur-sm">
+                  <span className="text-[0.5rem] sm:text-[0.6rem] bg-white/20 text-white/90 px-1 sm:px-1.5 py-0.5 rounded-full border border-white/30 inline-block w-fit leading-none backdrop-blur-sm">
                     organiza tu día
                   </span>
                 </div>
               </Link>
             </div>
 
-            {/* Acciones derecha - RESPONSIVE */}
+            {/* Acciones derecha */}
             <div className="flex items-center space-x-1 sm:space-x-2">
+              {/* Barra de búsqueda móvil */}
+              <div className="relative md:hidden">
+                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-white/70 w-3.5 h-3.5" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={handleSearchKeyPress}
+                  placeholder="Buscar..."
+                  className="w-28 sm:w-32 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full py-1.5 pl-7 pr-2 text-xs text-white placeholder-white/50 focus:ring-2 focus:ring-white/50 transition-all"
+                />
+              </div>
+
               {/* Theme Toggle */}
               <div className="scale-90 sm:scale-95">
                 <ThemeToggle />
@@ -288,18 +272,18 @@ const Header: React.FC<HeaderProps> = ({
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                  className="relative p-1.5 sm:p-2 rounded-lg sm:rounded-xl hover:bg-gray-100/80 dark:hover:bg-gray-800/80 transition-all duration-300 text-gray-600 dark:text-gray-300 backdrop-blur-sm"
+                  className="relative p-1.5 sm:p-2 rounded-lg sm:rounded-xl hover:bg-white/20 transition-all duration-300 text-white backdrop-blur-sm"
                   aria-label="Notificaciones"
                 >
                   <Bell size={18} className="sm:w-[20px] sm:h-[20px]" />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white text-[9px] sm:text-[10px] w-3.5 h-3.5 sm:w-4 sm:h-4 flex items-center justify-center rounded-full shadow-lg animate-pulse">
+                    <span className="absolute -top-0.5 -right-0.5 bg-yellow-400 text-emerald-800 text-[9px] sm:text-[10px] w-3.5 h-3.5 sm:w-4 sm:h-4 flex items-center justify-center rounded-full shadow-lg animate-pulse font-bold">
                       {unreadCount}
                     </span>
                   )}
                 </motion.button>
 
-                {/* Dropdown de notificaciones - RESPONSIVE */}
+                {/* Dropdown de notificaciones */}
                 <AnimatePresence>
                   {isNotificationsOpen && (
                     <motion.div
@@ -366,17 +350,16 @@ const Header: React.FC<HeaderProps> = ({
                 </AnimatePresence>
               </div>
 
-              {/* Botón para abrir menú lateral derecho - RESPONSIVE */}
+              {/* Botón para abrir menú lateral derecho */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsRightMenuOpen(true)}
-                className="flex items-center gap-1.5 sm:gap-2 px-1.5 sm:px-2 py-1 sm:py-1.5 rounded-lg sm:rounded-xl hover:bg-gray-100/80 dark:hover:bg-gray-800/80 transition-all duration-300 backdrop-blur-sm"
+                className="flex items-center gap-1.5 sm:gap-2 px-1.5 sm:px-2 py-1 sm:py-1.5 rounded-lg sm:rounded-xl hover:bg-white/20 transition-all duration-300 backdrop-blur-sm"
                 aria-label="Abrir menú rápido"
                 title="Menú rápido"
               >
-                {/* Avatar pequeño - RESPONSIVE */}
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl overflow-hidden shadow-md ring-2 ring-white/50 dark:ring-gray-700/50">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl overflow-hidden shadow-md ring-2 ring-white/50">
                   {avatarUrl && !avatarError ? (
                     <img 
                       src={avatarUrl} 
@@ -390,51 +373,17 @@ const Header: React.FC<HeaderProps> = ({
                     </div>
                   )}
                 </div>
-                <ChevronDown size={14} className="sm:w-[16px] sm:h-[16px] text-gray-500" />
+                <ChevronDown size={14} className="sm:w-[16px] sm:h-[16px] text-white" />
               </motion.button>
             </div>
           </div>
 
-          {/* Barra de búsqueda con saludo - DESKTOP (md+) */}
-          <div className="hidden md:block pb-3 lg:pb-4 relative z-10">
-            {/* Saludo */}
-            <div className="flex justify-center mb-2 lg:mb-3">
-              <motion.div 
-                whileHover={{ scale: 1.02 }}
-                className={`inline-flex items-center gap-2 lg:gap-3 px-3 lg:px-5 py-1.5 lg:py-2 rounded-full border backdrop-blur-sm ${greeting.bgColor} ${greeting.borderColor} shadow-lg`}
-              >
-                <div className={`p-1 lg:p-1.5 rounded-full bg-white/60 dark:bg-gray-800/60 ${greeting.accentColor}`}>
-                  {greeting.icon}
-                </div>
-                <div className="flex flex-col items-start">
-                  <div className="flex items-center gap-1.5 lg:gap-2">
-                    <span className={`text-sm lg:text-base font-bold ${greeting.textColor}`}>
-                      {greeting.text}
-                    </span>
-                    <Sparkles size={12} className={`lg:w-[14px] lg:h-[14px] ${greeting.accentColor}`} />
-                  </div>
-                  <div className="flex items-center gap-1.5 lg:gap-2 text-[10px] lg:text-xs">
-                    <Calendar size={9} className={`lg:w-[10px] lg:h-[10px] ${greeting.accentColor}`} />
-                    <span className="text-gray-600 dark:text-gray-400 font-medium">
-                      {greeting.day}
-                    </span>
-                    <span className="text-gray-400 dark:text-gray-500">•</span>
-                    <span className="text-gray-600 dark:text-gray-400">
-                      {greeting.date}
-                    </span>
-                  </div>
-                </div>
-                <div className={`text-xs lg:text-sm font-semibold bg-gradient-to-r ${greeting.gradient} text-white px-2 lg:px-3 py-0.5 lg:py-1 rounded-full backdrop-blur-sm shadow-md`}>
-                  {displayName.split(' ')[0]}
-                </div>
-              </motion.div>
-            </div>
-
-            {/* Barra de búsqueda */}
+          {/* Barra de búsqueda desktop */}
+          <div className="hidden md:block pb-3">
             <div className="flex justify-center">
-              <div className="relative w-full max-w-xl lg:max-w-2xl">
-                <div className="absolute inset-y-0 left-0 pl-3 lg:pl-4 flex items-center pointer-events-none">
-                  <Search size={16} className="lg:w-[18px] lg:h-[18px] text-gray-400" />
+              <div className="relative w-full max-w-md">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search size={14} className="text-white/70" />
                 </div>
                 <input
                   ref={searchInputRef}
@@ -443,49 +392,18 @@ const Header: React.FC<HeaderProps> = ({
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={handleSearchKeyPress}
                   placeholder="Buscar tareas por título o descripción..."
-                  className="w-full pl-10 lg:pl-12 pr-4 py-2 lg:py-3 text-sm bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-full focus:ring-2 focus:ring-emerald-500/50 dark:focus:ring-emerald-400/50 transition-all text-gray-700 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 shadow-md"
+                  className="w-full pl-9 pr-4 py-2 text-sm bg-white/20 backdrop-blur-sm border border-white/30 rounded-full focus:ring-2 focus:ring-white/50 transition-all text-white placeholder-white/60 shadow-md"
                 />
               </div>
             </div>
           </div>
 
-          {/* Versión MÓVIL (menor a md) - RESPONSIVE */}
-          <div className="md:hidden pb-2 sm:pb-3 relative z-10">
-            {/* Saludo para móvil - COMPACTO */}
-            <div className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border backdrop-blur-sm ${greeting.bgColor} ${greeting.borderColor} mb-2 sm:mb-3 w-full`}>
-              <div className={`p-1 rounded-full ${greeting.accentColor} flex-shrink-0`}>
-                {greeting.icon}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1">
-                  <span className={`text-[11px] sm:text-sm font-medium ${greeting.textColor} truncate`}>
-                    {greeting.text}
-                  </span>
-                  <span className={`text-[10px] sm:text-xs ${greeting.textColor} opacity-80 truncate`}>
-                    {greeting.day}
-                  </span>
-                </div>
-                <span className={`text-[9px] sm:text-[10px] ${greeting.textColor} opacity-60 block`}>
-                  {greeting.date}
-                </span>
-              </div>
-              <span className={`text-[10px] sm:text-xs font-semibold bg-gradient-to-r ${greeting.gradient} text-white px-2 py-0.5 rounded-full backdrop-blur-sm flex-shrink-0`}>
-                {displayName.split(' ')[0]}
-              </span>
-            </div>
-            
-            {/* Búsqueda móvil */}
-            <div className="relative">
-              <Search className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-[14px] h-[14px] sm:w-[16px] sm:h-[16px]" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={handleSearchKeyPress}
-                placeholder="Buscar tareas..."
-                className="w-full bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-full py-2 sm:py-2.5 pl-8 sm:pl-9 pr-3 text-[13px] sm:text-sm placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-emerald-500/50 dark:focus:ring-emerald-400/50 transition-all text-gray-700 dark:text-gray-200"
-              />
-            </div>
+          {/* Versión MÓVIL - Widget compacto */}
+          <div className="md:hidden pb-3">
+            <GreetingWidget 
+              userName={displayName}
+              compact={true}
+            />
           </div>
         </div>
       </motion.header>

@@ -1,3 +1,4 @@
+// src/pages/SettingsPage.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../hooks/useTheme';
@@ -5,12 +6,12 @@ import { useThemeClasses } from '../hooks/useThemeClasses';
 import { useAuth } from '../hooks/useAuth';
 import { PasskeyManager } from '../components/webauthn/PasskeyManager';
 import { TwoFactorManager } from '../components/profile/TwoFactorManager';
+import UserProfileCard from '../components/profile/UserProfileCard';
 import { 
   Lock, ChevronDown, KeyRound, AlertCircle,
   Moon, Sun, Bell, SortAsc, Save, Grid, List, 
   User, Info, Heart, Shield, 
-  ArrowLeft, ChevronRight, Sparkles, LogOut,
-  Mail, CheckCircle, Fingerprint, Settings,
+  ArrowLeft, ChevronRight, Sparkles, LogOut, Fingerprint, Settings,
   HardDrive
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -192,41 +193,7 @@ const SettingsPage: React.FC = () => {
   const displayName = user?.full_name || user?.username || 'Usuario';
   const displayEmail = user?.email || 'usuario@todoappmanager.com';
   const avatarUrl = user?.avatar;
-
-  const getInitials = (): string => {
-    if (displayName === 'Usuario') return 'U';
-    const nameParts = displayName.split(' ').filter((part: string) => part.length > 0);
-    if (nameParts.length === 0) return 'U';
-    if (nameParts.length === 1) {
-      return nameParts[0].substring(0, Math.min(2, nameParts[0].length)).toUpperCase();
-    }
-    return (nameParts[0][0] + (nameParts[1] ? nameParts[1][0] : '')).toUpperCase();
-  };
-
-  const getAvatarColor = (): string => {
-    if (displayName === 'Usuario') return 'from-emerald-500 to-cyan-500';
-    
-    const gradients = [
-      'from-emerald-500 to-cyan-500',
-      'from-green-500 to-teal-500',
-      'from-orange-500 to-red-500',
-      'from-purple-500 to-pink-500',
-      'from-blue-500 to-indigo-500',
-      'from-yellow-500 to-orange-500',
-      'from-cyan-500 to-blue-500',
-      'from-teal-500 to-emerald-500',
-      'from-violet-500 to-purple-500'
-    ];
-    
-    const charCodeSum = displayName.split('').reduce((sum: number, char: string) => sum + char.charCodeAt(0), 0);
-    const gradientIndex = charCodeSum % gradients.length;
-    
-    return gradients[gradientIndex];
-  };
-
-  const handleAvatarError = () => {
-    setAvatarError(true);
-  };
+  const isEmailVerified = user?.email_verified || false;
 
   return (
     <div className={`min-h-screen ${classes.bg.primary}`}>
@@ -257,67 +224,15 @@ const SettingsPage: React.FC = () => {
 
       {/* Contenido */}
       <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
-        {/* PERFIL DEL USUARIO */}
+        {/* PERFIL DEL USUARIO - NUEVO COMPONENTE */}
         <SectionHeader title="Perfil" icon={<User size={14} />} />
-        <GlassCard className="overflow-visible">
-          <div className="p-6 sm:p-8 flex flex-col items-center justify-center gap-4 sm:gap-5">
-            {/* Avatar con efecto de glow */}
-            <div className="relative group">
-              <motion.div 
-                className="absolute -inset-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 rounded-full opacity-75 group-hover:opacity-100 blur-lg transition duration-300"
-                animate={{ rotate: [0, 360] }}
-                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-              />
-              <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden shadow-2xl ring-4 ring-white dark:ring-gray-800">
-                {avatarUrl && !avatarError ? (
-                  <img 
-                    src={avatarUrl} 
-                    alt={displayName}
-                    className="w-full h-full object-cover"
-                    onError={handleAvatarError}
-                  />
-                ) : (
-                  <div className={`w-full h-full bg-gradient-to-br ${getAvatarColor()} flex items-center justify-center text-white text-2xl sm:text-3xl font-bold`}>
-                    {getInitials()}
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            {/* Información del usuario */}
-            <div className="text-center space-y-2">
-              <h2 className={`text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r ${isDark ? 'from-white to-gray-300' : 'from-gray-800 to-gray-600'} bg-clip-text text-transparent`}>
-                {displayName}
-              </h2>
-              
-              <div className="flex items-center justify-center gap-2">
-                <div className="p-1.5 rounded-full bg-emerald-500/10">
-                  <Mail size={14} className="text-emerald-500" />
-                </div>
-                <span className={`text-sm sm:text-base ${classes.text.secondary} font-medium`}>
-                  {displayEmail}
-                </span>
-              </div>
-              
-              {user?.email_verified && (
-                <motion.div 
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20"
-                >
-                  <CheckCircle size={12} className="text-emerald-500" />
-                  <span className={`text-xs ${classes.text.muted}`}>
-                    Correo verificado
-                  </span>
-                </motion.div>
-              )}
-            </div>
-
-            {/* Línea decorativa */}
-            <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent rounded-full" />
-          </div>
-        </GlassCard>
+        <UserProfileCard
+          displayName={displayName}
+          displayEmail={displayEmail}
+          avatarUrl={avatarUrl}
+          isEmailVerified={isEmailVerified}
+          onAvatarError={() => setAvatarError(true)}
+        />
 
         {/* APARIENCIA */}
         <SectionHeader title="Apariencia" icon={<Sun size={14} />} />
@@ -593,6 +508,23 @@ const SettingsPage: React.FC = () => {
           </motion.div>
         </GlassCard>
 
+        {/* ACERCA DE - AHORA ARRIBA DE DESARROLLADOR */}
+        <SectionHeader title="Acerca de" icon={<Info size={14} />} />
+        <GlassCard>
+          <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4">
+            <div className="p-2 sm:p-3 rounded-xl bg-blue-400/10 flex-shrink-0">
+              <Info className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className={`font-medium text-sm sm:text-base ${classes.text.primary}`}>Versión</h3>
+              <p className={`text-xs sm:text-sm truncate ${classes.text.secondary}`}>
+                TodoAppManager v2.6.0 - Supabase Edition
+              </p>
+            </div>
+            <Sparkles className="w-4 h-4 text-emerald-500" />
+          </div>
+        </GlassCard>
+
         {/* REGISTRO DE CAMBIOS */}
         <SectionHeader title="Actualizaciones" icon={<Info size={14} />} />
         <GlassCard>
@@ -636,23 +568,6 @@ const SettingsPage: React.FC = () => {
             Ver perfil del desarrollador
           </motion.button>
         </motion.div>
-
-        {/* ACERCA DE */}
-        <SectionHeader title="Acerca de" icon={<Info size={14} />} />
-        <GlassCard>
-          <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4">
-            <div className="p-2 sm:p-3 rounded-xl bg-blue-400/10 flex-shrink-0">
-              <Info className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className={`font-medium text-sm sm:text-base ${classes.text.primary}`}>Versión</h3>
-              <p className={`text-xs sm:text-sm truncate ${classes.text.secondary}`}>
-                TodoAppManager v2.6.0 - Supabase Edition
-              </p>
-            </div>
-            <Sparkles className="w-4 h-4 text-emerald-500" />
-          </div>
-        </GlassCard>
       </div>
 
       {/* Modal de confirmación de cierre de sesión */}
@@ -695,11 +610,22 @@ const SettingsPage: React.FC = () => {
                           src={avatarUrl} 
                           alt={displayName}
                           className="w-20 h-20 rounded-full object-cover"
-                          onError={handleAvatarError}
+                          onError={() => setAvatarError(true)}
                         />
                       ) : (
-                        <div className={`w-20 h-20 rounded-full bg-gradient-to-br ${getAvatarColor()} flex items-center justify-center text-white text-2xl font-bold`}>
-                          {getInitials()}
+                        <div className={`w-20 h-20 rounded-full bg-gradient-to-br ${(() => {
+                          if (displayName === 'Usuario') return 'from-emerald-500 to-cyan-500';
+                          const gradients = ['from-emerald-500 to-cyan-500', 'from-green-500 to-teal-500', 'from-orange-500 to-red-500', 'from-purple-500 to-pink-500', 'from-blue-500 to-indigo-500', 'from-yellow-500 to-orange-500', 'from-cyan-500 to-blue-500', 'from-teal-500 to-emerald-500', 'from-violet-500 to-purple-500'];
+                          const charCodeSum = displayName.split('').reduce((sum: number, char: string) => sum + char.charCodeAt(0), 0);
+                          return gradients[charCodeSum % gradients.length];
+                        })()} flex items-center justify-center text-white text-2xl font-bold`}>
+                          {(() => {
+                            if (displayName === 'Usuario') return 'U';
+                            const nameParts = displayName.split(' ').filter(p => p.length > 0);
+                            if (nameParts.length === 0) return 'U';
+                            if (nameParts.length === 1) return nameParts[0].substring(0, Math.min(2, nameParts[0].length)).toUpperCase();
+                            return (nameParts[0][0] + (nameParts[1] ? nameParts[1][0] : '')).toUpperCase();
+                          })()}
                         </div>
                       )}
                     </div>
