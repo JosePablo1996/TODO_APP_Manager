@@ -8,11 +8,15 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+vite.log
 
 # ============================================
 # DEPENDENCIAS
 # ============================================
 node_modules
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
 # ============================================
 # BUILD OUTPUT
@@ -20,18 +24,26 @@ node_modules
 dist
 dist-ssr
 build
+*.local
 
 # ============================================
-# VARIABLES DE ENTORNO LOCALES
+# VARIABLES DE ENTORNO LOCALES (NO SUBIR)
 # ============================================
 .env
-.env.local
-.env.development.local
-.env.test.local
-
-# ✅ PERMITIR estos archivos de entorno (se suben a GitHub para Render)
+.env.*
+!.env.example
 !.env.production
 !.env.development
+*.env.txt
+*.env.local
+*.env.*.txt
+Variables_Frontend_React.env.txt
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ✅ PERMITIR archivos de ejemplo (se suben a GitHub)
+!.env.example
 
 # ============================================
 # ARCHIVOS DEL PROYECTO (NO SUBIR)
@@ -39,24 +51,34 @@ build
 
 # Documentación personal
 Variables_Frontend_React.env.txt
+Variables_Fronted_React.env.txt
 README.md
+TODO.md
+NOTES.md
 
 # Archivos de configuración de herramientas
 .hintrc
 get-ip.cjs
+*.code-workspace
 
 # ============================================
-# EDITOR
+# EDITOR / IDE
 # ============================================
 .vscode/*
 !.vscode/extensions.json
-.idea
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
 .DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+.vscode-test/
+.vscode-test-mcp/
 
 # ============================================
 # SISTEMA OPERATIVO
@@ -65,10 +87,101 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
-
-# ============================================
-# ARCHIVOS TEMPORALES
-# ============================================
+*.bak
 *.tmp
 *.temp
 *.cache
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+# ============================================
+# ARCHIVOS DE DEPURACIÓN
+# ============================================
+*.tsbuildinfo
+*.d.ts.map
+*.js.map
+*.css.map
+*.map
+
+# ============================================
+# ARCHIVOS DE COBERTURA DE CÓDIGO
+# ============================================
+coverage
+*.lcov
+.nyc_output
+
+# ============================================
+# ARCHIVOS DE COMPRESIÓN
+# ============================================
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# ============================================
+# ARCHIVOS DE ERRORES
+# ============================================
+error.log
+warn.log
+debug.log
+
+# ============================================
+# ARCHIVOS DE CONFIGURACIÓN PERSONAL
+# ============================================
+*.local
+*.secret
+*.private
+
+# ============================================
+# ARCHIVOS DE STACK DE TRABAJO
+# ============================================
+*.stackdump
+core.*
+*.core
+
+# ============================================
+# ARCHIVOS DE DATOS DE PRUEBA
+# ============================================
+test-results/
+playwright-report/
+test-dist/
+
+# ============================================
+# ARCHIVOS DE RENDER (DEPLOY)
+# ============================================
+.vercel
+.netlify
+.render
+heroku
+railway
+*.deploy
+
+# ============================================
+# ARCHIVOS DE RESPALDO
+# ============================================
+*.backup
+*.old
+*.orig
+*.rej
+*.patch
+
+# ============================================
+# ARCHIVOS DE BASES DE DATOS LOCALES
+# ============================================
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# ============================================
+# ARCHIVOS DE PROYECTOS
+# ============================================
+.DS_Store
+*.swp
+*~
+*.lock
+*.pid
+*.seed
+*.pid.lock
