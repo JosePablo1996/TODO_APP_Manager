@@ -224,7 +224,7 @@ const SettingsPage: React.FC = () => {
 
       {/* Contenido */}
       <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
-        {/* PERFIL DEL USUARIO - NUEVO COMPONENTE */}
+        {/* PERFIL DEL USUARIO */}
         <SectionHeader title="Perfil" icon={<User size={14} />} />
         <UserProfileCard
           displayName={displayName}
@@ -331,7 +331,9 @@ const SettingsPage: React.FC = () => {
           />
         </GlassCard>
 
-        {/* SEGURIDAD */}
+        {/* ============================================ */}
+        {/* SEGURIDAD - SECCIÓN ACTUALIZADA              */}
+        {/* ============================================ */}
         <SectionHeader title="Seguridad" icon={<Shield size={14} />} />
         <GlassCard>
           {/* ✅ PASSKEYS - SOLO EN LOCALHOST */}
@@ -419,6 +421,15 @@ const SettingsPage: React.FC = () => {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* ✅ NUEVO: GESTIÓN DE SEGURIDAD UNIFICADA */}
+          <SettingsTile
+            icon={<Shield className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-500" />}
+            iconColor="bg-emerald-500/10"
+            title="Centro de Seguridad"
+            subtitle="Gestiona toda la seguridad de tu cuenta"
+            onClick={() => navigate('/seguridad')}
+          />
 
           {/* COPIA DE SEGURIDAD */}
           <SettingsTile
@@ -508,7 +519,7 @@ const SettingsPage: React.FC = () => {
           </motion.div>
         </GlassCard>
 
-        {/* ACERCA DE - AHORA ARRIBA DE DESARROLLADOR */}
+        {/* ACERCA DE */}
         <SectionHeader title="Acerca de" icon={<Info size={14} />} />
         <GlassCard>
           <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4">

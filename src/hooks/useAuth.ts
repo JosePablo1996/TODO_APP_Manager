@@ -47,24 +47,30 @@ export interface LoginResponse {
 
 const TOKEN_VERSION_ERROR_KEY = 'token_version_error_shown';
 
-// ✅ CORREGIDO: Usar el RP ID correcto según el entorno
+// ============================================
+// ✅ PASO 1: FUNCIÓN CORREGIDA PARA OBTENER RP ID
+// ============================================
+
+/**
+ * Obtiene el RP ID correcto según el entorno
+ * - En desarrollo local (localhost): usa "localhost"
+ * - En producción: usa el dominio del frontend
+ */
 function getCorrectRpId(): string {
   const hostname = window.location.hostname;
+  
+  // ✅ En desarrollo local (localhost), usar "localhost"
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    // En desarrollo local, usamos el RP ID del backend de producción
-    // porque el proxy de Vite redirige a Render
-    return 'todo-app-backend-fastapi-klh2.onrender.com';
+    console.log('🏠 [WebAuthn] Entorno LOCAL detectado, RP ID: localhost');
+    return 'localhost';
   }
-  // En producción (Netlify, Render, etc.), usar el hostname del backend
-  return 'todo-app-backend-fastapi-klh2.onrender.com';
+  
+  // ✅ En producción, usar el dominio del frontend
+  // El RP ID debe ser el dominio del sitio web, no del backend
+  console.log(`🌐 [WebAuthn] Entorno PRODUCCIÓN detectado, RP ID: ${hostname}`);
+  return hostname;
 }
 
-// ✅ Verificar si estamos en entorno de desarrollo
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function isDevelopment(): boolean {
-  return window.location.hostname === 'localhost' || 
-         window.location.hostname === '127.0.0.1';
-}
 
 export const useAuth = () => {
   const navigate = useNavigate();
@@ -327,7 +333,10 @@ export const useAuth = () => {
     }
   }, [isAuthenticated, logout, loadUser]);
 
-  // ✅ CORREGIDO: registerPasskey con RP ID correcto
+  // ============================================
+  // ✅ PASO 2 Y 3: registerPasskey y loginWithPasskey CORREGIDOS
+  // ============================================
+
   const registerPasskey = useCallback(async (deviceName?: string): Promise<PasskeyRegisterResult> => {
     if (!isAuthenticated) return { success: false, message: 'Debes iniciar sesión primero' };
     const tokenValid = await refreshTokenIfNeeded();
@@ -341,14 +350,15 @@ export const useAuth = () => {
       });
       
       const { startRegistration } = await import('@simplewebauthn/browser');
-      const rpId = getCorrectRpId();
       
+      // ✅ OBTENER EL RP ID CORRECTO SEGÚN EL ENTORNO
+      const rpId = getCorrectRpId();
       console.log('🔑 registerPasskey: Usando RP ID:', rpId);
       
       const attestationResponse = await startRegistration({
         optionsJSON: {
           challenge: options.challenge,
-          rp: { id: rpId, name: options.rp_name },
+          rp: { id: rpId, name: options.rp_name },  // ✅ Usar el RP ID correcto
           user: { 
             id: options.user_id, 
             name: options.username, 
@@ -391,7 +401,6 @@ export const useAuth = () => {
     }
   }, [isAuthenticated, refreshTokenIfNeeded]);
 
-  // ✅ CORREGIDO: loginWithPasskey sin doble guardado de tokens y con RP ID correcto
   const loginWithPasskey = useCallback(async (email?: string): Promise<PasskeyLoginResult> => {
     setPasskeyLoading(true);
     try {
@@ -409,21 +418,20 @@ export const useAuth = () => {
         }));
       }
       
+      // ✅ OBTENER EL RP ID CORRECTO SEGÚN EL ENTORNO
       const rpId = getCorrectRpId();
       console.log('🔑 loginWithPasskey: Usando RP ID:', rpId);
       
       const authResponse = await startAuthentication({
         optionsJSON: { 
           challenge: options.challenge, 
-          rpId, 
+          rpId,  // ✅ Usar el RP ID correcto
           allowCredentials, 
           timeout: options.timeout || 60000, 
           userVerification: 'preferred' 
         },
       });
       
-      // ✅ authService.webauthnLoginComplete YA guarda los tokens
-      // No llamamos a saveTokens aquí para evitar duplicados
       const result = await authService.webauthnLoginComplete({
         credential_id: authResponse.id,
         client_data_json: authResponse.response.clientDataJSON,
@@ -434,7 +442,7 @@ export const useAuth = () => {
       });
       
       if (result.success && result.access_token) {
-        // ✅ Los tokens ya fueron guardados por authService.webauthnLoginComplete
+        // Los tokens ya fueron guardados por authService.webauthnLoginComplete
         if (isMounted.current) setIsAuthenticated(true);
         await loadUser();
         window.dispatchEvent(new CustomEvent('auth-change'));

@@ -25,6 +25,8 @@ import RegisterPage from './auth/RegisterPage';
 import ForgotPasswordPage from './auth/ForgotPasswordPage';
 import ResetPasswordPage from './auth/ResetPasswordPage';
 import EmailOTPPage from './auth/EmailOTPPage';
+// ✅ NUEVA IMPORTACIÓN: Página de Seguridad unificada
+import SecurityPage from './pages/SecurityPage';
 import './index.css';
 
 // ============================================
@@ -322,7 +324,7 @@ const AppRoutes: React.FC = () => {
         } 
       />
 
-      {/* Copia de Seguridad (Backup/Restore) - v2.6.0 */}
+      {/* Copia de Seguridad (Backup/Restore) */}
       <Route 
         path="/backup" 
         element={
@@ -331,6 +333,44 @@ const AppRoutes: React.FC = () => {
           </PrivateRoute>
         } 
       />
+
+      {/* ============================================ */}
+      {/* ✅ NUEVA PÁGINA DE SEGURIDAD UNIFICADA       */}
+      {/* ============================================ */}
+
+      {/* Página principal de Seguridad (unifica todo) */}
+      <Route 
+        path="/seguridad" 
+        element={
+          <PrivateRoute>
+            <SecurityPage />
+          </PrivateRoute>
+        } 
+      />
+
+      {/* Alias: /sesiones redirige a la nueva página de seguridad */}
+      <Route 
+        path="/sesiones" 
+        element={
+          <PrivateRoute>
+            <SecurityPage />
+          </PrivateRoute>
+        } 
+      />
+
+      {/* Alias: /historial-accesos redirige a la nueva página de seguridad */}
+      <Route 
+        path="/historial-accesos" 
+        element={
+          <PrivateRoute>
+            <SecurityPage />
+          </PrivateRoute>
+        } 
+      />
+
+      {/* ============================================ */}
+      {/* INFORMACIÓN Y SOPORTE                        */}
+      {/* ============================================ */}
 
       {/* Información del Desarrollador */}
       <Route 

@@ -22,7 +22,8 @@ import {
   TrendingUp,
   FolderOpen,
   Plus,
-  Trash2
+  Trash2,
+  Globe
 } from 'lucide-react';
 import type { UserProfile } from '../services/authService';
 
@@ -140,6 +141,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, user, onLogout }) 
     setAvatarError(true);
   };
 
+  // ✅ MENÚ ITEMS ACTUALIZADO
   const menuItems: MenuItem[] = [
     {
       label: 'Dashboard',
@@ -198,6 +200,14 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, user, onLogout }) 
       color: 'indigo',
       description: 'Análisis de progreso',
     },
+    // ✅ SECCIÓN DE SEGURIDAD UNIFICADA
+    {
+      label: 'Inicios de sesión',
+      icon: <Globe className="w-5 h-5" />,
+      path: '/seguridad',
+      color: 'emerald',
+      description: 'Gestiona tu seguridad',
+    },
     {
       label: 'Configuración',
       icon: <Settings className="w-5 h-5" />,
@@ -214,6 +224,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, user, onLogout }) 
     },
   ];
 
+  // ✅ SECCIONES ACTUALIZADAS
   const menuSections: MenuSection[] = [
     {
       title: 'Principal',
@@ -230,10 +241,16 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, user, onLogout }) 
       icon: <BarChart3 className="w-4 h-4" />,
       items: [menuItems[7]],
     },
+    // ✅ SECCIÓN DE SEGURIDAD
+    {
+      title: 'Seguridad',
+      icon: <Shield className="w-4 h-4" />,
+      items: [menuItems[8]],
+    },
     {
       title: 'Configuración',
       icon: <Settings className="w-4 h-4" />,
-      items: menuItems.slice(8, 10),
+      items: menuItems.slice(9, 11),
     },
   ];
 
@@ -310,7 +327,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, user, onLogout }) 
     }
   };
 
-  // Si el menú NO está abierto, no renderizamos nada (ni botón flotante)
+  // Si el menú NO está abierto, no renderizamos nada
   if (!isOpen) {
     return null;
   }
